@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" , maximum-scale="1.0" , user-scalable="no">
+    <title>Chain Reaction Mobile</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <main class="app-container">
+        <header class="game-header">
+            <h1 class="game-title">Chain Reaction</h1>
+            <div id="turn-indicator" class="turn-badge player-red">
+                Vez do Jogador: <span id="current-player-name">Vermelho</span>
+            </div>
+        </header>
+
+        <section class="board-container">
+            <div id="game-board" class="board-grid">
+                <!-- As células do tabuleiro serão geradas pelo JavaScript -->
+            </div>
+        </section>
+
+        <footer class="game-footer">
+            <button id="btn-reset" class="btn-primary">Reiniciar Partida</button>
+        </footer>
+    </main>
+
+    <div id="win-modal" class="modal-overlay hidden">
+        <div class="modal-card">
+            <h2 class="modal-title">🏆 VITÓRIA!</h2>
+            <p class="modal-message">O Jogador <span id="winner-name">Vermelho</span> dominou o tabuleiro!</p>
+            <button id="btn-play-again" class="btn-primary btn-success">Jogar Novamente</button>
+        </div>
+    </div>
+
+    <script type="module" src="./scripts/main.js"></script>
+
+</body>
+
+</html>

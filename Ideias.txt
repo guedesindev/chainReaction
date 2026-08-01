@@ -1,0 +1,123 @@
+Chain Reaction
+
+O que é?
+
+É um jogo multiplayer para 1 a 4 jogadores cujo objetivo é ocupar toda a grade com esferas de sua cor.
+
+Como é?
+
+- Cada jogador tem uma cor atribuída a si. 
+- O jogo ocorre em rodadas (turnos), 
+- Cada jogador escolhe uma casa na grade para inserir uma bolinha de sua cor, ao clicar na grade uma bolinha em sua cor é inserida na casa clicada.
+- O jogador pode clicar na mesma casa mais de uma vez, entretanto uma casa ocupada por outra cor não pode ser clicada por um jogador.
+- Em cada clique uma bolinha é adicionada.
+- As casas têm limites de bolinhas.
+- Quando o limite de bolinhas é atingido a bolinha explode
+- Quando a bolinha explode em uma casa, a casa fica fazia e a bolinha se espalha para as casas axiais vizinhas.
+- Se a casa da explosão for nos cantos a bolinha se espalha para as duas casas vizinhas, logo nas casas dos cantos só podem ser adicionadas no máximo 2 bolinhas;
+- Se a explosão for nas margens, há 3 casas axiais vizinhas, logo a bolinha se espalha para essas 3 casas, deixando a casa original vazia
+- Se a explosão acontecer em casas centrais, uma vez que essas casas têm 4 casas vizinhas, a bolinha se espalha para essas 4 casas.
+- Quando ocorre uma explosão e as casas vizinhas axiais tiverem bolinhas nas cores adversárias, elas são influenciadas e se tornam na cor que originou a explosão.
+
+---
+Tentativa de exemplificar graficamente as explosões e espalhamentos
+
+ _ _ _ _ _ _ _
+|_|_|_|_|_|_|_|
+|_|_|_|_|_|_|_|
+|_|_|_|_|_|_|_| -> Exemplo da grade
+|_|_|_|_|_|_|_|
+|_|_|_|_|_|_|_|
+|_|_|_|_|_|_|_|
+|_|_|_|_|_|_|_|
+
+---
+Bolinha no canto
+ _ _ _ _ _ _ _                        _ _ _ _ _ _ _ 
+|o|_|_|_|_|_|_|                      |_|o|_|_|_|_|_| 
+|_|_|_|_|_|_|_|                      |o|_|_|_|_|_|_|
+|_|_|_|_|_|_|_| -> Após explosão ->  |_|_|_|_|_|_|_|
+|_|_|_|_|_|_|_|                      |_|_|_|_|_|_|_|
+|_|_|_|_|_|_|_|                      |_|_|_|_|_|_|_|
+|_|_|_|_|_|_|_|                      |_|_|_|_|_|_|_|
+|_|_|_|_|_|_|_|                      |_|_|_|_|_|_|_|
+
+---
+Bolinha em uma das margens
+ _ _ _ _ _ _ _                        _ _ _ _ _ _ _ 
+|_|_|_|o|_|_|_|                      |_|_|o|_|o|_|_| 
+|_|_|_|_|_|_|_|                      |_|_|_|o|_|_|_|
+|_|_|_|_|_|_|_| -> Após explosão ->  |_|_|_|_|_|_|_|
+|_|_|_|_|_|_|_|                      |_|_|_|_|_|_|_|
+|_|_|_|_|_|_|_|                      |_|_|_|_|_|_|_|
+|_|_|_|_|_|_|_|                      |_|_|_|_|_|_|_|
+|_|_|_|_|_|_|_|                      |_|_|_|_|_|_|_|
+
+---
+Bolinha em casas centrais
+ _ _ _ _ _ _ _                        _ _ _ _ _ _ _ 
+|_|_|_|_|_|_|_|                      |_|_|_|_|_|_|_| 
+|_|_|_|_|_|_|_|                      |_|_|_|o|_|_|_|
+|_|_|_|o|_|_|_| -> Após explosão ->  |_|_|o|_|o|_|_|
+|_|_|_|_|_|_|_|                      |_|_|_|o|_|_|_|
+|_|_|_|_|_|_|_|                      |_|_|_|_|_|_|_|
+|_|_|_|_|_|_|_|                      |_|_|_|_|_|_|_|
+|_|_|_|_|_|_|_|                      |_|_|_|_|_|_|_|
+
+---
+Explosão com vizinho adversário
+
+ _ _ _ _ _ _ _                        _ _ _ _ _ _ _ 
+|_|_|_|_|_|_|_|                      |_|_|_|_|_|_|_| 
+|_|_|_|_|_|_|_|                      |_|_|_|o|_|_|_|
+|_|_|_|o|x|_|_| -> Após explosão ->  |_|_|o|_|o|_|_|
+|_|_|_|_|_|_|_|                      |_|_|_|o|_|_|_|
+|_|_|_|_|_|_|_|                      |_|_|_|_|_|_|_|
+|_|_|_|_|_|_|_|                      |_|_|_|_|_|_|_|
+|_|_|_|_|_|_|_|                      |_|_|_|_|_|_|_|
+
+---
+Objetivo do Projeto
+
+Aprendizado em: 
+- Desenvolvimento
+- Design Pattern
+- utilização do Firebase Realtime Database (websocket nativo via sdk)
+- Utilizar o mongoDB para guardar perfis de usuários e leaderboard
+- Criação de um backend na mão
+
+---
+Detalhes do Projeto
+
+- Tecnologia: JavaScript
+- Design Pattern: EventManager
+- Banco de dados MongoDB Atlas (pensando em jogos em tempo real)
+- Backend: API Fetch (porque minha hospedagem não aceita instalações NODE)
+- Autenticação do usuário (JWT - JSON Web Tokens) - Sessão simples
+  -> Usuário faz login com apelido/senha, o backend gera um 'token' criptografado, o navegador salva o token no localStorage. Em cada jogada ou busca o navegador envia esse token no header da requisição Fetch para provar quem ele é.
+
+---
+Diretrizes Técnicas para o Design
+- Mobile First
+- Grid do Tabuleiro -> usar unidades relativas (vw/vh ou clamp() ajuste ideal em telas sejam grandes ou pequenas)
+- Toque Rápido -> Aplicar a propriedade CSS `touch-action: manipulation;` para eliminar atraso de 300ms
+- feedback tátil -> usar api nativa do navegador (navigator.vibrate(100)) para fazer o celular vibrar nas explosões
+- Orientação da Tela -> Forçar ou otimizar a experiência para o modo retrato que é a posição natural que as pessoas usam o celular com uma mão só.
+
+---
+Interface
+- Mobile First
+- Responsividade
+- Suporte a PWA -> Facilidade de instalação (adicionar à tela de início)
+  -> Tela 1 - Login/nickname rápido: Apenas um campo para digitação do nome (para testar rápido)
+  -> Tela 2 - Lobby/Salas: Botão "Criar Sala" ou "Entrar em Sala Existente" (Usando código de 4 dígitos - excelente ideia para amigos se conectarem na sala, talvez fosse legal colocar uma senha na sala?)
+  -> Tela 3 - O Tabuleiro: A tela do jogo com um botão simples "Ver Regras" (Modal de Tutorial) e o Leaderboard aparecendo apenas quando a partida terminar.
+
+
+---
+Engajamento e Gameficação
+- Sistema de pontuação: RATING ELO/MMR + Badges/Troféus no perfil do usuário
+- Screen Shake
+- Vibração no celular
+- Mensagens escalonadas de combo
+- Efeitos visuais nas explosões

@@ -1,0 +1,310 @@
+/* ==========================================================================
+   1. CONFIGURAÇÕES BASE E RESET MOBILE
+   ========================================================================== */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    /* Evita seleção acidental de texto ao tocar rapidamente na tela */
+    user-select: none;
+    -webkit-user-select: none;
+    /* Desativa o destaque cinzento padrão do toque no Chrome/Safari Mobile */
+    -webkit-tap-highlight-color: transparent;
+}
+
+body {
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background-color: #0f172a;
+    /* Azul muito escuro (Dark Mode) */
+    color: #f8fafc;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    /* Melhora o comportamento de toque no mobile */
+    touch-action: manipulation;
+}
+
+/* Contentor que simula a tela do telemóvel */
+.app-container {
+    width: 100%;
+    max-width: 480px;
+    /* Largura máxima padrão para smartphones */
+    height: 100vh;
+    max-height: 900px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 16px;
+}
+
+/* ==========================================================================
+   2. CABEÇALHO E INDICADOR DE TURNO
+   ========================================================================== */
+.game-header {
+    text-align: center;
+    margin-bottom: 12px;
+}
+
+.game-title {
+    font-size: 1.5rem;
+    font-weight: 800;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+    color: #38bdf8;
+}
+
+.turn-badge {
+    display: inline-block;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-weight: 700;
+    font-size: 0.95rem;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+/* Cores dinâmicas para os jogadores */
+.turn-badge.player-red {
+    background-color: #ef4444;
+    color: #ffffff;
+    box-shadow: 0 0 12px rgba(239, 68, 68, 0.4);
+}
+
+.turn-badge.player-blue {
+    background-color: #3b82f6;
+    color: #ffffff;
+    box-shadow: 0 0 12px rgba(59, 130, 246, 0.4);
+}
+
+/* ==========================================================================
+   3. TABULEIRO E CÉLULAS (CSS GRID)
+   ========================================================================== */
+.board-container {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.board-grid {
+    display: grid;
+    gap: 4px;
+    /* Espaçamento entre as casas */
+    background-color: var(--background-color, #b9432e45);
+    transition: background-color 0.4s ease;
+    padding: 6px;
+    border-radius: 12px;
+    border: 2px solid var(--border-color, #334155);
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+    width: 100%;
+    grid-template-columns: repeat(var(--cols, 6), 1fr);
+    grid-template-rows: repeat(var(--rows, 8), 1fr);
+    aspect-ratio: var(--cols, 6) / var(--rows, 8);
+}
+
+/* Célula individual do tabuleiro */
+.cell {
+    background-color: #0f172a;
+    border-radius: 8px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+.cell:active {
+    background-color: #1e293b;
+}
+
+/* ==========================================================================
+   4. VISUAL DAS ESFERAS (ORBS)
+   ========================================================================== */
+.orb-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 3px;
+    width: 100%;
+    height: 100%;
+}
+
+.orb {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    transition: transform 0.2s ease, background-color 0.2s ease;
+    margin: 0;
+}
+
+/* Estilo visual 3D simples para as esferas com gradiente */
+.orb.red {
+    background: radial-gradient(circle at 30% 30%, #fca5a5, #ef4444, #991b1b);
+    box-shadow: 0 0 8px rgba(239, 68, 68, 0.6);
+}
+
+.orb.blue {
+    background: radial-gradient(circle at 30% 30%, #93c5fd, #3b82f6, #1e40af);
+    box-shadow: 0 0 8px rgba(59, 130, 246, 0.6);
+}
+
+/* ==========================================================================
+   5. RODAPÉ E BOTÕES
+   ========================================================================== */
+.game-footer {
+    text-align: center;
+    margin-top: 12px;
+}
+
+.btn-primary {
+    background-color: #334155;
+    color: #f8fafc;
+    border: none;
+    padding: 12px 24px;
+    font-size: 1rem;
+    font-weight: 600;
+    border-radius: 8px;
+    cursor: pointer;
+    width: 100%;
+    transition: background-color 0.2s ease;
+}
+
+.btn-primary:active {
+    background-color: #475569;
+}
+
+
+/* ==========================================================================
+   6. MODAL DE VITÓRIA
+   ========================================================================== */
+
+.modal-overlay {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(15, 23, 42, 0.85);
+    backdrop-filter: blur(4px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    opacity: 1;
+    transition: opacity 0.3s ease;
+}
+
+.modal-overlay.hidden {
+    display: none;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.modal-card {
+    background-color: #1e293b;
+    border: 2px solid #334155;
+    border-radius: 16px;
+    padding: 32px 24px;
+    text-align: center;
+    width: 90%;
+    max-width: 360px;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, .6);
+    animation: modalPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.modal-title {
+    font-size: 2rem;
+    color: #f59e0b;
+    margin-bottom: 12px;
+}
+
+.modal-message {
+    font-size: 1.1rem;
+    color: #cbd5e1;
+    margin-bottom: 24px;
+}
+
+#winner-name {
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.btn-success {
+    background-color: #10b981;
+    color: #FFFFFF;
+}
+
+.btn-success:active {
+    background-color: #059669;
+}
+
+@keyframes modalPop {
+    0% {
+        transform: scale(0.7);
+        opacity: 0;
+    }
+
+    100% {
+        transform: scale(1);
+        opacity: 1
+    }
+}
+
+/* ==========================================================================
+   7. GAME JUICE - Animações e efeitos visuais
+   ==========================================================================
+*/
+
+.orb {
+    animation: orbPop 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+@keyframes orbPop {
+    0% {
+        transform: scale(0);
+        opacity: 0;
+    }
+
+    70% {
+        transform: scale(1.2);
+        opacity: 1;
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+.shake {
+    animation: boardShake 0.3s cubic-bezier(0.36, 0.07, 0.19, .097) both;
+}
+
+@keyframes boardShake {
+
+    10%,
+    90% {
+        transform: translate3d(-2px, 0, 0);
+    }
+
+    20%,
+    80% {
+        transform: translate34(3px, 0, 0);
+    }
+
+    30%,
+    50%,
+    70% {
+        transform: translate3d(-5px, 0, 0);
+    }
+
+    40%,
+    60% {
+        transform: translate3d(5px, 0, 0);
+    }
+
+}
