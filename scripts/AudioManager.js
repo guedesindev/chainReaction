@@ -1,78 +1,106 @@
-class AudioManager {
+/**
+ * AudioManager.js
+ * 
+ * Responsabilidade: Gerenciar efeitos sonoros via Web Audio API
+ * e respostas táticas de vibração via Web Vibration API.
+ */
+
+export default class AudioManager {
     constructor() {
         this.audioCtx = null;
         this.isMuted = false;
     }
 
-    initAudioContext() {
+    /**
+     * Inicializa e garante o desbloqueio do AudioContext no navegador.
+     * @return {Promise} Garantir que o contexto esteja ativo antes de tocar.
+     */
+    async ensureAudioContext() {
         if (!this.audioCtx) {
             const AudioContextClass = window.AudioContext || window.webkitAudioContext;
             if (AudioContextClass) {
-                this.audioCtx = new AudioContextClass()
+                this.audioCtx = new AudioContextClass();
             }
         }
 
         if (this.audioCtx && this.audioCtx.state === 'suspended') {
-            this.audioCtx.resume();
+            try {
+                await this.audioCtx.resume();
+            } catch (e) {
+                console.warn('Aguardando interação do usuário para ativar o áudio.', e);
+            }
         }
+
+        return this.audioCtx;
     }
 
-    playPopSound() {
+    /**
+     * Toca o som "Pop" ao colocar uma esfera.
+     */
+    async playPopSound() {
         if (this.isMuted) return;
-        this.initAudioContext();
-        if (!this.audioCtx) return;
+        const ctx = await this.ensureAudioContext();
+        if (!ctx || ctx.state !== 'running') return;
 
-        const osc = this.audioCtx.createOscillator();
-        const gain = this.audioCtx.createGain();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
 
         osc.type = 'sine';
-        osc.frequency.setValueAtTime(440, this.audioCtx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(880, this.audioCtx.currentTime + 0.05);
+        osc.frequency.setValueAtTime(440, ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.05);
 
-        gain.gain.setValueAtTime(0.15, this.audioCtx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, this.audioCtx.currentTime + 0.05);
-
-        osc.connect(gain)
-        gain.connect(this.audioCtx.destination);
-
-        osc.start();
-        osc.stop(this.audioCtx.currentTime + 0.05);
-    }
-
-    playExplosionSound() {
-        if (this.isMuted) return;
-        this.initAudioContext();
-        if (!this.audioCtx) return;
-
-        const osc = this.audioCtx.createOscillator();
-        const gain = this.audioCtx.createGain();
-
-        osc.type = 'triangle';
-        osc.frequency.setValueAtTime(120, this.audioCtx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(40, this.audioCtx.currentTime + 0.2);
-
-        gain.gain.setValueAtTime(0.3, this.audioCtx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.01, this.audioCtx.currentTime + 0.2);
+        gain.gain.setValueAtTime(0.15, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.05);
 
         osc.connect(gain);
-        gain.connect(this.audioCtx.destination);
+        gain.connect(ctx.destination);
 
         osc.start();
-        osc.stop(this.audioCtx.currentTime + 0.2);
+        osc.stop(ctx.currentTime + 0.05);
     }
 
-    playVictorySound() {
+    /**
+     * Toca o som de "Explosão" nas reações em cadeia.
+     */
+    async playExplosionSound() {
         if (this.isMuted) return;
-        this.initAudioContext();
-        if (!this.audioCtx) return;
+        const ctx = await this.ensureAudioContext();
+        if (!ctx || ctx.state !== 'running') return;
+
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(120, ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(30, ctx.currentTime + 0.2);
+
+        gain.gain.setValueAtTime(0.3, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.2);
+
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+
+        osc.start();
+        osc.stop(ctx.currentTime + 0.2);
+    }
+
+    /**
+     * Função assíncrona para garantir sincronia no servidor remoto.
+     * Som de 3 notas no acorde C (C, E, G) em arpejo.
+     */
+    async playVictorySound() {
+        if (this.isMuted) return;
+
+        const ctx = await this.ensureAudioContext();
+        if (!ctx) return;
 
         // Frequências das notas: Dó (C5), Mi (E5), Sol (G5)
         const notes = [523.25, 659.25, 783.99];
-        const now = this.audioCtx.currentTime;
+        const now = ctx.currentTime;
 
         notes.forEach((freq, index) => {
-            const osc = this.audioCtx.createOscillator();
-            const gain = this.audioCtx.createGain();
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
 
             osc.type = 'sine';
             osc.frequency.value = freq;
@@ -84,33 +112,37 @@ class AudioManager {
             gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
 
             osc.connect(gain);
-            gain.connect(this.audioCtx.destination);
+            gain.connect(ctx.destination);
 
             osc.start(startTime);
             osc.stop(startTime + duration);
         });
     }
 
+    /**
+     * Vibração no dispositivo móvel.
+     * @param {number|Array<number>} pattern 
+     */
     vibrate(pattern) {
         if ('vibrate' in navigator) {
             try {
                 navigator.vibrate(pattern);
             } catch (e) {
-                // Ignora silenciosamente se o dispositivo/navegador proibir vibração
+                console.warn('[⚠️ Vibração] Erro ao disparar vibração.', e)
             }
         }
     }
 
     vibrateMove() {
-        this.vibrate(15);
+        this.vibrate(12);
     }
 
     vibrateExplosion() {
-        this.vibrate([40, 30, 40]);
+        this.vibrate([30, 20, 30]);
     }
 
     vibrateVictory() {
-        this.vibrate([100, 50, 100, 50, 200])
+        this.vibrate([100, 50, 100, 50, 200]);
     }
 }
 

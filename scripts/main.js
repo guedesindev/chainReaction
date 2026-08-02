@@ -155,10 +155,10 @@ function setupEventListeners() {
         updateTurnBadge(data.currentPlayer);
     });
 
-    eventManager.subscribe('game:over', (data) => {
+    eventManager.subscribe('game:over', async (data) => {
         showWinModal(data.winner);
-        audioManager.playVictorySound();
         audioManager.vibrateVictory();
+        await audioManager.playVictorySound();
     });
 }
 
