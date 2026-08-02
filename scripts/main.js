@@ -157,6 +157,8 @@ function setupEventListeners() {
 
     eventManager.subscribe('game:over', (data) => {
         showWinModal(data.winner);
+        audioManager.playVictorySound();
+        audioManager.vibrateVictory();
     });
 }
 
