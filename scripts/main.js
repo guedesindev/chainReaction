@@ -1,6 +1,7 @@
 import Board from './Board.js';
 import eventManager from './EventManager.js';
 import Tutorial from "./Tutorial.js";
+import { audioManager } from './AudioManager.js';
 
 const boardElement = document.getElementById('game-board');
 const turnIndicator = document.getElementById('turn-indicator');
@@ -139,11 +140,15 @@ function setupEventListeners() {
 
     eventManager.subscribe('board:move', () => {
         renderBoard();
+        audioManager.playPopSound();
+        audioManager.vibrateMove();
     });
 
     eventManager.subscribe('cell:exploded', (data) => {
         renderBoard();
         triggerScreenShake();
+        audioManager.playExplosionSound();
+        audioManager.vibrateExplosion();
     });
 
     eventManager.subscribe('turn:changed', (data) => {
@@ -182,6 +187,8 @@ function startNewGame() {
         tutorialInstance = new Tutorial()
         tutorialInstance.init()
     }
+
+    console.log('Este game foi desenvolvido por \n👩🏽‍💻 Fernando Guedes\ngithub do projeto: https://github.com/guedesindev/chainReaction\nMeu portifólio 🌐: https://guedesindev.github.io/portifolio/')
 }
 
 btnReset.addEventListener('click', () => {
