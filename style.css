@@ -308,3 +308,152 @@ body {
     }
 
 }
+
+
+/*==================================================
+ * TUTORIAL INTERATIVO & BOTÃO DE AJUDA
+ * =================================================*/
+
+.header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 8px;
+}
+
+/* Botão de ícone (?)*/
+.btn-icon {
+    background-color: #334155;
+    color: #f8fafc;
+    border: 1px solid #475569;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    font-size: 1.1rem;
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: background-color 0.2s, transform 0.1s;
+}
+
+.btn-icon:active {
+    transform: scale(0.92);
+    background-color: #475569;
+}
+
+.tutorial-card {
+    position: absolute;
+    max-width: 400px;
+    min-height: 380px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.btn-close {
+    position: absolute;
+    top: 12px;
+    right: 16px;
+    background: none;
+    border: none;
+    color: #94a3b8;
+    font-size: 1.8rem;
+    cursor: pointer;
+}
+
+.tutorial-slide {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    animation: fadeIn 0.3s ease;
+}
+
+.slide-title {
+    font-size: 1.3rem;
+    color: #38bdf8;
+    margin-top: 8px;
+}
+
+.slide-text {
+    font-size: 0.95rem;
+    color: #cbd5e1;
+    line-height: 1.4;
+    text-align: center;
+}
+
+.demo-box {
+    background-color: #0f172a;
+    border: 2px solid #334155;
+    border-radius: 12px;
+    padding: 16px;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    min-height: 90px;
+}
+
+.tutoria-navigation {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 16px;
+}
+
+.dots-container {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+}
+
+.dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: #475569;
+    transition: background-color 0.3s;
+}
+
+.dot:active {
+    background-color: #38bdf8;
+    transform: scale(1.2);
+}
+
+.nav-buttons {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: .5rem;
+}
+
+.btn-secondary {
+    background-color: #475569;
+    color: #ffffff;
+    border: none;
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    flex: 1;
+}
+
+#btn-next-slide {
+    width: 50%;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(6px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

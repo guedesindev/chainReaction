@@ -1,5 +1,6 @@
 import Board from './Board.js';
 import eventManager from './EventManager.js';
+import Tutorial from "./Tutorial.js";
 
 const boardElement = document.getElementById('game-board');
 const turnIndicator = document.getElementById('turn-indicator');
@@ -18,6 +19,7 @@ const TOTAL_COLS = 6;
 const PLAYERS = ['red', 'blue'];
 
 let gameBoard = null
+let tutorialInstance = null;
 
 
 /**
@@ -38,8 +40,8 @@ function initUI() {
             cellElement.dataset.row = r;
             cellElement.dataset.col = c;
 
-            cellElement.addEventListener('click', () => {
-                gameBoard.makeMove(r, c);
+            cellElement.addEventListener('click', async () => {
+                await gameBoard.makeMove(r, c);
             });
 
             boardElement.appendChild(cellElement);
@@ -175,6 +177,11 @@ function startNewGame() {
 
     initUI();
     renderBoard();
+
+    if (!tutorialInstance) {
+        tutorialInstance = new Tutorial()
+        tutorialInstance.init()
+    }
 }
 
 btnReset.addEventListener('click', () => {

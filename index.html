@@ -11,7 +11,12 @@
 <body>
     <main class="app-container">
         <header class="game-header">
-            <h1 class="game-title">Chain Reaction</h1>
+            <div class="game-top">
+                <h1 class="game-title">Chain Reaction</h1>
+                <button id="btn-help" class="btn-icon" title="Como Jogar">?</button>
+            </div>
+
+
             <div id="turn-indicator" class="turn-badge player-red">
                 Vez do Jogador: <span id="current-player-name">Vermelho</span>
             </div>
@@ -28,11 +33,32 @@
         </footer>
     </main>
 
+    <!-- MODAL DE VITÓRIA / OVERLAY -->
     <div id="win-modal" class="modal-overlay hidden">
         <div class="modal-card">
             <h2 class="modal-title">🏆 VITÓRIA!</h2>
             <p class="modal-message">O Jogador <span id="winner-name">Vermelho</span> dominou o tabuleiro!</p>
             <button id="btn-play-again" class="btn-primary btn-success">Jogar Novamente</button>
+        </div>
+    </div>
+
+    <!-- MODAL DE TUTORIAL INTERATIVO (ONBOARDING) -->
+    <div id="tutorial-modal" class="modal-overlay hidden">
+        <div class="modal-card tutorial-card">
+            <button id="btn-close-tutorial" class="btn-close">&times;</button>
+
+            <!-- Conteúdo Dinâmico do Slide -->
+            <div id="tutorial-slide-container">
+                <!-- O JS injetará os slides aqui -->
+            </div>
+
+            <div class="tutorial-navigation">
+                <div id="tutorial-dots" class="dots-container"></div>
+                <div class="nav-buttons">
+                    <button id="btn-prev-slide" class="btn-secondary">Anterior</button>
+                    <button id="btn-next-slide" class="btn-primary">Próximo</button>
+                </div>
+            </div>
         </div>
     </div>
 
