@@ -69,7 +69,7 @@ O projeto foi construído do zero utilizando **JavaScript Moderno (ES6+)** com s
     └── Tutorial.js          # Controle da experiência interativa de onboarding
 ```
 
-# 🚀 Como Executar Localmente
+## 🚀 Como Executar Localmente
 
 Como o projeto utiliza módulos nativos do ES6 (import/export), basta rodar um servidor HTTP simples localmente:
 
@@ -93,7 +93,22 @@ python -m http.server 8000
 
 Abra o navegador em <http://localhost:8000>.
 
-# 📄 Licença
+## 🔮 Próximos Passos & Roadmap de Desenvolvimento
+
+O projeto continuará evoluindo para se tornar uma plataforma competitiva e completa! Confira o que está sendo preparado para as próximas versões:
+
+- [ ] **🤖 Módulo de Inteligência Artificial (Modo Solo):**
+  - Jogador contra CPU (opagantes com níveis Fácil, Médio e Difícil usando algoritmos de busca tática).
+- [ ] **🌐 Multiplayer Online em Tempo Real (Firebase):**
+  - Criação de salas públicas e privadas para jogar com amigos à distância via *Firebase Realtime Database*.
+- [ ] **🏆 Sistema de Pontuação ELO / Rating:**
+  - Classificação dinâmica dos jogadores com base em vitórias, derrotas e nível do oponente.
+- [ ] **📊 Leaderboard Global:**
+  - Placar dos melhores jogadores para incentivar a competitividade e o engajamento.
+- [ ] **⚙️ Painel de Customização:**
+  - Seleção de dimensão do tabuleiro (ex: 6x4, 8x6, 10x8) e suporte a 3 ou 4 jogadores na mesma partida.
+
+## 📄 Licença
 
 Este projeto está sob a licença MIT. Sinta-se à vontade para estudar, clonar e aprimorar!
 
