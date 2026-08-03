@@ -61,7 +61,7 @@ O projeto foi construído do zero utilizando **JavaScript Moderno (ES6+)** com s
 
 ├── index.html          # Estrutura HTML principal e modais
 ├── style.css           # Estilização responsiva, variáveis CSS e animações
-|-- scripts
+├── scripts
     ├── main.js             # Ponto de entrada do jogo (bootstrap)
     ├── EventManager.js     # Barramento central de eventos (Pub/Sub)
     ├── Board.js            # Lógica das células, matriz e reações em cadeia
