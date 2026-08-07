@@ -32,7 +32,7 @@ class EventManager {
      * @param {Function} fn - Função que deve ser removida
      */
     unsubscribe(eventname, fn) {
-        if (!this.event[eventName]) return;
+        if (!this.events[eventName]) return;
 
         this.events[eventName] = this.events[eventName].filter(
             (subscribedFn) => subscribedFn !== fn

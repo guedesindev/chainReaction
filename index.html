@@ -33,12 +33,39 @@
         </footer>
     </main>
 
-    <!-- MODAL DE VITÓRIA / OVERLAY -->
+    <!-- 1. MODAL DE VITÓRIA / FIM DE JOGO -->
     <div id="win-modal" class="modal-overlay hidden">
         <div class="modal-card">
-            <h2 class="modal-title">🏆 VITÓRIA!</h2>
-            <p class="modal-message">O Jogador <span id="winner-name">Vermelho</span> dominou o tabuleiro!</p>
-            <button id="btn-play-again" class="btn-primary btn-success">Jogar Novamente</button>
+            <h2 id="win-title" class="modal-title">🏆 Vitória!</h2>
+            <p id="win-message" class="modal-message">O Jogador <span id="winner-name">Vermelho</span> dominou o
+                tabuleiro!</p>
+
+            <div class="modal-actions" style="display: flex; gap: 10px; margin-top: 15px;">
+                <button id="btn-play-again" class="btn-primary" style="flex: 1;">🔄 Jogar Novamente</button>
+                <button id="btn-exit-lobby" class="btn-secondary" style="flex: 1;">🚪 Sair para o Lobby</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. MODAL DE SELEÇÃO DE MODO DE JOGO (LOBBY) -->
+    <div id="mode-modal" class="modal-overlay">
+        <div class="modal-card">
+            <h2 class="modal-title">🎮 Modo de Jogo</h2>
+            <p class="modal-message">Como você deseja jogar esta partida?</p>
+
+            <div class="mode-options" style="display: flex; flex-direction: column; gap: 10px; margin-top: 15px;">
+                <button id="btn-mode-pvp" class="btn-primary">👥 Jogador vs Jogador</button>
+                <button id="btn-mode-pve" class="btn-primary">🤖 Jogador vs CPU</button>
+            </div>
+
+            <!-- Opções de Dificuldade da CPU (Visíveis apenas ao escolher jogar vs CPU) -->
+            <div id="difficulty-options" class="difficulty-container hidden" style="margin-top: 15px;">
+                <p class="modal-message">Escolha o nível da CPU:</p>
+                <div class="difficulty-buttons" style="display: flex; gap: 10px; margin-top: 8px;">
+                    <button class="btn-secondary btn-diff" data-level="easy" style="flex: 1;">🟢 Fácil</button>
+                    <button class="btn-secondary btn-diff" data-level="medium" style="flex: 1;">🟡 Médio</button>
+                </div>
+            </div>
         </div>
     </div>
 

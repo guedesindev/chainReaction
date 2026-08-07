@@ -1,205 +1,148 @@
+/**
+ * main.js
+ * Ponto de entrada e orquestrador principal do jogo.
+ */
+
 import Board from './Board.js';
+import UIManager from './UIManager.js';
 import eventManager from './EventManager.js';
-import Tutorial from "./Tutorial.js";
 import { audioManager } from './AudioManager.js';
 
-const boardElement = document.getElementById('game-board');
-const turnIndicator = document.getElementById('turn-indicator');
-const currentPlayerName = document.getElementById('current-player-name');
-const btnReset = document.getElementById('btn-reset');
+// 1. Instâncias Globais
+const board = new Board();
+const uiManager = new UIManager();
 
-const winModal = document.getElementById('win-modal');
-const winnerName = document.getElementById('winner-name');
-const btnPlayAgain = document.getElementById('btn-play-again');
+let gameMode = 'pvp';
+let cpuDifficulty = 'easy';
 
-const gridElement = document.querySelector('.board-grid');
+const modeButtons = [uiManager.btnModePvp, uiManager.btnModePve];
 
-// Configurações iniciais do jogo
-const TOTAL_ROWS = 8;
-const TOTAL_COLS = 6;
-const PLAYERS = ['red', 'blue'];
-
-let gameBoard = null
-let tutorialInstance = null;
-
-
-/**
- * Inicializa a interface do usuário,
- * criando as células do tabuleiro e configurando os eventos de clique.
- */
-function initUI() {
-    boardElement.style.setProperty('--cols', gameBoard.cols);
-    boardElement.style.setProperty('--rows', gameBoard.rows);
-
-    boardElement.innerHTML = '';
-
-    for (let r = 0; r < gameBoard.rows; r++) {
-        for (let c = 0; c < gameBoard.cols; c++) {
-            const cellElement = document.createElement('div');
-            cellElement.classList.add('cell');
-
-            cellElement.dataset.row = r;
-            cellElement.dataset.col = c;
-
-            cellElement.addEventListener('click', async () => {
-                await gameBoard.makeMove(r, c);
-            });
-
-            boardElement.appendChild(cellElement);
-        }
-    }
-
-    hideWinModal();
-    updateTurnBadge(gameBoard.getCurrentPlayer());
-}
-
-/**
- * Renderização do tabuleiro, esferas dentro das células de acordo com o estado atual do jogo.
- */
-function renderBoard() {
-    for (let r = 0; r < gameBoard.rows; r++) {
-        for (let c = 0; c < gameBoard.cols; c++) {
-            const cellData = gameBoard.grid[r][c];
-
-            const cellElement = boardElement.querySelector(`[data-row="${r}"][data-col="${c}"]`);
-
-            if (!cellElement) continue;
-
-            if (cellData.orbs === 0) {
-                cellElement.innerHTML = '';
-                continue;
-            }
-
-            let orbContainer = cellElement.querySelector('.orb-container');
-            if (!orbContainer) {
-                orbContainer = document.createElement('div');
-                orbContainer.classList.add('orb-container');
-                cellElement.appendChild(orbContainer);
-            }
-
-            const existingOrbs = orbContainer.querySelectorAll('.orb');
-            const currentCount = existingOrbs.length;
-            const targetCount = cellData.orbs;
-
-            existingOrbs.forEach(orb => {
-                orb.className = `orb ${cellData.owner}`;
-            });
-
-            if (targetCount > currentCount) {
-                const orbsToAdd = targetCount - currentCount;
-
-                for (let i = 0; i < orbsToAdd; i++) {
-                    const newOrb = document.createElement('div');
-                    newOrb.classList.add('orb', cellData.owner);
-                    orbContainer.appendChild(newOrb);
-                }
-            }
-            else if (targetCount < currentCount) {
-                const orbsToRemove = currentCount - targetCount;
-                for (let i = 0; i < orbsToRemove; i++) {
-                    if (orbContainer.lastChild) {
-                        orbContainer.removeChild(orbContainer.lastChild);
-                    }
-                }
-            }
-
-        }
-    }
-}
-
-/**
- * Atualiza o indicador de turno, mostrando a cor do jogador atual e seu nome.
- * @param {string} playerColor 
- */
-function updateTurnBadge(playerColor) {
-    turnIndicator.className = `turn-badge player-${playerColor}`;
-    currentPlayerName.textContent = playerColor === 'red' ? 'Vermelho' : 'Azul';
-    if (gridElement) {
-        gridElement.style.setProperty(
-            '--background-color',
-            playerColor === 'red' ? "#b9432e45" : "#1d488645"
-        );
-    }
-}
-
-function showWinModal(winnerColor) {
-    winnerName.textContent = winnerColor === 'red' ? 'Vermelho' : 'Azul';
-    winnerName.style.color = winnerColor === 'red' ? '#ef4444' : '#3b82f6';
-    winModal.classList.remove('hidden');
-}
-
-function hideWinModal() {
-    winModal.classList.add('hidden');
-}
-
-// ====================================================
-// Inscrições de eventos (pub/sub)
-// ====================================================
+// 2. Assinatura de Eventos do Sistema
 function setupEventListeners() {
     eventManager.reset();
 
+    // ASSINANTE ADICIONADO: Escuta quando o tabuleiro é resetado
+    eventManager.subscribe('board:reset', () => {
+        uiManager.buildBoardDOM(board.rows, board.cols);
+        uiManager.renderBoard(board.grid);
+        uiManager.updateTurnIndicator(board.getCurrentPlayer());
+    });
+
+    // Escuta quando o jogador clica em uma célula na UI
+    eventManager.subscribe('cell:clicked', ({ row, col }) => {
+        board.makeMove(row, col);
+    });
+
+    // Escuta quando uma jogada ou movimento é realizado
     eventManager.subscribe('board:move', () => {
-        renderBoard();
         audioManager.playPopSound();
         audioManager.vibrateMove();
+        uiManager.renderBoard(board.grid);
     });
 
-    eventManager.subscribe('cell:exploded', (data) => {
-        renderBoard();
-        triggerScreenShake();
+    // Escuta quando uma célula explode
+    eventManager.subscribe('cell:exploded', () => {
         audioManager.playExplosionSound();
-        audioManager.vibrateExplosion();
+        audioManager.vibrateVictory()
+        uiManager.renderBoard(board.grid);
     });
 
+    // Escuta quando o turno troca
     eventManager.subscribe('turn:changed', (data) => {
-        updateTurnBadge(data.currentPlayer);
+        uiManager.updateTurnIndicator(data.currentPlayer);
     });
 
-    eventManager.subscribe('game:over', async (data) => {
-        showWinModal(data.winner);
-        audioManager.vibrateVictory();
-        await audioManager.playVictorySound();
+    // Escuta fim de jogo
+    eventManager.subscribe('game:over', (data) => {
+        audioManager.playVictorySound()
+        if (typeof uiManager.showWinModal === 'function') {
+            uiManager.showWinModal(data.winner);
+        }
     });
 }
 
-function triggerScreenShake() {
-    if (!boardElement) return;
-
-    boardElement.classList.remove('shake');
-
-    void boardElement.offsetWidth;
-
-    boardElement.classList.add('shake');
-
-    setTimeout(() => {
-        boardElement.classList.remove('shake');
-    }, 300);
-}
-
-
+// 3. Função para Iniciar Partida
 function startNewGame() {
-    gameBoard = new Board(TOTAL_ROWS, TOTAL_COLS, PLAYERS);
-
     setupEventListeners();
-
-    initUI();
-    renderBoard();
-
-    if (!tutorialInstance) {
-        tutorialInstance = new Tutorial()
-        tutorialInstance.init()
-    }
-
-    console.log('Este game foi desenvolvido por \n👩🏽‍💻 Fernando Guedes\ngithub do projeto: https://github.com/guedesindev/chainReaction\nMeu portifólio 🌐: https://guedesindev.github.io/portifolio/')
+    board.reset(); // Isso vai disparar o evento 'board:reset', ativando a reconstrução e renderização da tela!
 }
 
-btnReset.addEventListener('click', () => {
-    startNewGame();
-})
+// 4. Configuração dos Eventos da Interface de Usuário (Botões)
 
-btnPlayAgain.addEventListener('click', () => {
-    startNewGame();
-})
+if (uiManager.btnCloseTutorial) {
+    uiManager.btnCloseTutorial.addEventListener('click', () => {
+        uiManager.hideTutorialModal();
+        if (typeof uiManager.tutorial.markAsSeen === 'function') {
+            uiManager.tutorial.markAsSeen();
+        } else {
+            localStorage.setItem(uiManager.tutorial.STORAGE_KEY, 'true');
+        }
+        uiManager.showModeModal();
+    });
+}
 
+if (uiManager.btnModePvp) {
+    uiManager.btnModePvp.addEventListener('click', () => {
+        uiManager.setActiveButton(uiManager.btnModePvp, modeButtons);
+        gameMode = 'pvp';
 
-startNewGame();
+        setTimeout(() => {
+            uiManager.hideModeModal();
+            startNewGame();
+        }, 200);
+    });
+}
+
+if (uiManager.btnModePve) {
+    uiManager.btnModePve.addEventListener('click', () => {
+        uiManager.setActiveButton(uiManager.btnModePve, modeButtons);
+        gameMode = 'pve';
+        uiManager.showDifficultyOptions();
+    });
+}
+
+uiManager.diffButtons.forEach(button => {
+    button.addEventListener('click', () => {
+        uiManager.setActiveButton(button, uiManager.diffButtons);
+        cpuDifficulty = button.dataset.level;
+
+        setTimeout(() => {
+            uiManager.hideModeModal();
+            startNewGame();
+        }, 200);
+    });
+});
+
+if (uiManager.btnReset) {
+    uiManager.btnReset.addEventListener('click', () => {
+        startNewGame();
+    });
+}
+
+if (uiManager.btnPlayAgain) {
+    uiManager.btnPlayAgain.addEventListener('click', () => {
+        uiManager.hideWinModal();
+        startNewGame()
+    })
+}
+
+if (uiManager.btnExitLobby) {
+    uiManager.btnExitLobby.addEventListener('click', () => {
+        console.log("Saindo para o Lobby")
+        uiManager.hideWinModal()
+        uiManager.showModeModal()
+    })
+}
+
+// 5. Inicialização da Aplicação
+function initApp() {
+    const hasSeenTutorial = uiManager.tutorial.hasSeenTutorial();
+
+    if (!hasSeenTutorial) {
+        uiManager.showTutorialModal();
+    } else {
+        uiManager.showModeModal();
+    }
+}
+
+initApp();

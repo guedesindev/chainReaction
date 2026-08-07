@@ -7,6 +7,7 @@ export default class Board {
         this.cols = cols;
         this.players = players;
         this.currentPlayerIndex = 0;
+        this.currentPlayer = this.players[this.currentPlayerIndex];
         this.totalMoves = 0;
 
         this.grid = [];
@@ -48,7 +49,6 @@ export default class Board {
 
         const cell = this.grid[row]?.[col];
         if (!cell) return false;
-
         const currentPlayer = this.getCurrentPlayer();
 
         if (!cell.isEmpty() && cell.owner !== currentPlayer) {
@@ -223,6 +223,7 @@ export default class Board {
     reset() {
         this.initGrid();
         this.currentPlayerIndex = 0;
+        this.totalMoves = 0;
         this.isProcessing = false;
         this.isGameOver = false;
         eventManager.publish('board:reset')
