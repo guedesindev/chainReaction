@@ -88,7 +88,6 @@ if (uiManager.btnCloseTutorial) {
 }
 
 if (uiManager.btnModePvp) {
-    console.log(MUSIC_SRC);
     uiManager.btnModePvp.addEventListener('click', () => {
         uiManager.setActiveButton(uiManager.btnModePvp, modeButtons);
         gameMode = 'pvp';
