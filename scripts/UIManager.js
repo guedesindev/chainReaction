@@ -12,17 +12,23 @@ export default class UIManager {
 
         // Referências aos Modais e Botões
         this.modeModal = document.getElementById('mode-modal');
+        this.winModal = document.getElementById('win-modal');
+        this.tutorialModal = document.getElementById('tutorial-modal');
+        this.creditsModal = document.getElementById('credits-modal');
+
+
         this.difficultyOptions = document.getElementById('difficulty-options');
         this.btnModePvp = document.getElementById('btn-mode-pvp');
         this.btnModePve = document.getElementById('btn-mode-pve');
         this.diffButtons = document.querySelectorAll('.btn-diff');
-        this.tutorialModal = document.getElementById('tutorial-modal');
+        this.btnTutorial = document.getElementById('btn-help');
         this.btnCloseTutorial = document.getElementById('btn-close-tutorial');
-
         this.btnReset = document.getElementById('btn-reset');
         this.btnPlayAgain = document.getElementById('btn-play-again');
+        this.btnCredits = document.getElementById('btn-credits');
+        this.btnCloseCredits = document.getElementById('btn-close-credits');
+
         this.btnExitLobby = document.getElementById('btn-exit-lobby');
-        this.winModal = document.getElementById('win-modal');
         this.winnerNameEl = document.getElementById('winner-name')
         this.turnIndicator = document.getElementById('turn-indicator');
 
@@ -209,6 +215,18 @@ export default class UIManager {
     hideWinModal() {
         if (this.winModal) {
             this.winModal.classList.add('hidden');
+        }
+    }
+
+    showCreditsModal() {
+        if (this.creditsModal) {
+            this.creditsModal.classList.remove('hidden');
+        }
+    }
+
+    hideCreditsModal() {
+        if (this.creditsModal) {
+            this.creditsModal.classList.add('hidden');
         }
     }
 

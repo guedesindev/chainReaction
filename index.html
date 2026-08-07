@@ -13,7 +13,10 @@
         <header class="game-header">
             <div class="game-top">
                 <h1 class="game-title">Chain Reaction</h1>
-                <button id="btn-help" class="btn-icon" title="Como Jogar">?</button>
+                <div class="header-buttons">
+                    <button id="btn-credits" class="btn-icon" title="Créditos">🗃️</button>
+                    <button id="btn-help" class="btn-icon" title="Como Jogar">?</button>
+                </div>
             </div>
 
 
@@ -88,6 +91,22 @@
             </div>
         </div>
     </div>
+
+    <!-- MODAL DE CRÉDITOS -->
+    <div id="credits-modal" class="modal-overlay hidden">
+        <div class="modal-card credits-card">
+            <button id="btn-close-credits" class="btn-close">&times;</button>
+            <h2 class="modal-title">🎵 Créditos</h2>
+            <p class="modal-message" style="text-align:left;font-size:0.9rem;line-height:1.6">
+                <strong style="font-size: 1.25rem;">Decisions</strong><br>
+                Kevin MacLeod (incompetech.com)<br. Licenciado sob Creative Commons: Atribuição 4.0<br>
+                    <a href="http://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener"
+                        style="color:#38bdf8;">
+                        creativecommons.org/licenses/by/4.0</a>
+            </p>
+        </div>
+    </div>
+
 
     <script type="module" src="./scripts/main.js"></script>
 

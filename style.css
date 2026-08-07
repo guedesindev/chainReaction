@@ -422,7 +422,13 @@ body {
     margin-bottom: 8px;
 }
 
-/* Botão de ícone (?)*/
+/* Botão de ícone (?) e créditos */
+.header-buttons {
+    display: flex;
+    justify-content: space-evenly;
+    margin: 1rem auto;
+}
+
 .btn-icon {
     background-color: #334155;
     color: #f8fafc;
@@ -448,6 +454,15 @@ body {
     position: absolute;
     max-width: 400px;
     min-height: 380px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.credits-card {
+    position: absolute;
+    max-width: 400px;
+    min-height: fit-content;
     display: flex;
     flex-direction: column;
     justify-content: space-between;

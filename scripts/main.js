@@ -11,6 +11,7 @@ import { audioManager } from './AudioManager.js';
 // 1. Instâncias Globais
 const board = new Board();
 const uiManager = new UIManager();
+const MUSIC_SRC = './assets/audio/decisions.mp3';
 
 let gameMode = 'pvp';
 let cpuDifficulty = 'easy';
@@ -23,6 +24,7 @@ function setupEventListeners() {
 
     // ASSINANTE ADICIONADO: Escuta quando o tabuleiro é resetado
     eventManager.subscribe('board:reset', () => {
+        audioManager.playBackgroundMusic(MUSIC_SRC);
         uiManager.buildBoardDOM(board.rows, board.cols);
         uiManager.renderBoard(board.grid);
         uiManager.updateTurnIndicator(board.getCurrentPlayer());
@@ -54,6 +56,7 @@ function setupEventListeners() {
 
     // Escuta fim de jogo
     eventManager.subscribe('game:over', (data) => {
+        audioManager.stopBackgroundMusic();
         audioManager.playVictorySound()
         if (typeof uiManager.showWinModal === 'function') {
             uiManager.showWinModal(data.winner);
@@ -68,6 +71,9 @@ function startNewGame() {
 }
 
 // 4. Configuração dos Eventos da Interface de Usuário (Botões)
+if (uiManager.tutorial) {
+    uiManager.tutorial.init();
+}
 
 if (uiManager.btnCloseTutorial) {
     uiManager.btnCloseTutorial.addEventListener('click', () => {
@@ -82,9 +88,11 @@ if (uiManager.btnCloseTutorial) {
 }
 
 if (uiManager.btnModePvp) {
+    console.log(MUSIC_SRC);
     uiManager.btnModePvp.addEventListener('click', () => {
         uiManager.setActiveButton(uiManager.btnModePvp, modeButtons);
         gameMode = 'pvp';
+        audioManager.playBackgroundMusic(MUSIC_SRC);
 
         setTimeout(() => {
             uiManager.hideModeModal();
@@ -97,6 +105,7 @@ if (uiManager.btnModePve) {
     uiManager.btnModePve.addEventListener('click', () => {
         uiManager.setActiveButton(uiManager.btnModePve, modeButtons);
         gameMode = 'pve';
+        audioManager.playBackgroundMusic(MUSIC_SRC);
         uiManager.showDifficultyOptions();
     });
 }
@@ -131,6 +140,18 @@ if (uiManager.btnExitLobby) {
         console.log("Saindo para o Lobby")
         uiManager.hideWinModal()
         uiManager.showModeModal()
+    })
+}
+
+if (uiManager.btnCredits) {
+    uiManager.btnCredits.addEventListener('click', () => {
+        uiManager.showCreditsModal();
+    });
+}
+
+if (uiManager.btnCloseCredits) {
+    uiManager.btnCloseCredits.addEventListener('click', () => {
+        uiManager.hideCreditsModal();
     })
 }
 

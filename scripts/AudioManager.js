@@ -9,6 +9,41 @@ export default class AudioManager {
     constructor() {
         this.audioCtx = null;
         this.isMuted = false;
+        this.bgmElement = null;
+    }
+
+    /**
+     * Tocar música de fundo, arquivo estático em loop
+     * @param {string} src - caminho para o arquivo de áudio
+     * @param {number} volume - volume entre 0 e 1
+     */
+    playBackgroundMusic(src, volume = 0.15) {
+        if (!this.bgmElement) {
+            this.bgmElement = new Audio(src);
+            this.bgmElement.loop = true;
+            this.bgmElement.volume = volume;
+        }
+
+        if (this.isMuted) return;
+
+        this.bgmElement.play().catch(e => {
+            console.warn('[⚠️ BGM] Aguardando interação do usuário para iniciar a música. ', e)
+        });
+    }
+
+    stopBackgroundMusic() {
+        if (this.bgmElement) {
+            this.bgmElement.pause();
+            this.bgmElement.currentTime = 0;
+        }
+    }
+
+    toogleMute() {
+        this.isMuted = !this.isMuted;
+        if (this.bgmElement) {
+            this.bgmElement.muted = this.isMuted;
+        }
+        return this.isMuted;
     }
 
     /**
@@ -49,7 +84,7 @@ export default class AudioManager {
         osc.frequency.setValueAtTime(440, ctx.currentTime);
         osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.05);
 
-        gain.gain.setValueAtTime(0.15, ctx.currentTime);
+        gain.gain.setValueAtTime(0.35, ctx.currentTime);
         gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.05);
 
         osc.connect(gain);
