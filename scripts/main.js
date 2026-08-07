@@ -4,6 +4,7 @@
  */
 
 import Board from './Board.js';
+import Bot from './Bot.js';
 import UIManager from './UIManager.js';
 import eventManager from './EventManager.js';
 import { audioManager } from './AudioManager.js';
@@ -15,6 +16,7 @@ const MUSIC_SRC = './assets/audio/decisions.mp3';
 
 let gameMode = 'pvp';
 let cpuDifficulty = 'easy';
+let bot = null;
 
 const modeButtons = [uiManager.btnModePvp, uiManager.btnModePve];
 
@@ -52,6 +54,7 @@ function setupEventListeners() {
     // Escuta quando o turno troca
     eventManager.subscribe('turn:changed', (data) => {
         uiManager.updateTurnIndicator(data.currentPlayer);
+        maybeTriggerBotMove(data.currentPlayer);
     });
 
     // Escuta fim de jogo
@@ -67,7 +70,21 @@ function setupEventListeners() {
 // 3. Função para Iniciar Partida
 function startNewGame() {
     setupEventListeners();
+    bot = gameMode === 'pve' ? new Bot('blue', cpuDifficulty) : null;
     board.reset(); // Isso vai disparar o evento 'board:reset', ativando a reconstrução e renderização da tela!
+}
+
+function maybeTriggerBotMove(currentPlayer) {
+    if (gameMode !== 'pve' || !bot) return;
+    if (currentPlayer !== bot.playerColor) return;
+    if (board.isGameOver) return;
+
+    setTimeout(() => {
+        const move = bot.chooseMove(board.grid);
+        if (move) {
+            board.makeMove(move.row, move.col);
+        }
+    }, 600);
 }
 
 // 4. Configuração dos Eventos da Interface de Usuário (Botões)

@@ -9,6 +9,9 @@
     <link rel="icon" type="image/svg+xml" href="./assets/imgs/favicon.svg">
     <link rel="alternate icon" href="./assets/imgs/favicon.ico">
     <link rel="apple-touch-icon" href="./assets/imgs/apple-touch-icon.png">
+    <script type="module">
+
+    </script>
 </head>
 
 <body>
@@ -110,8 +113,10 @@
         </div>
     </div>
 
-
-    <script type="module" src="./scripts/main.js"></script>
+    <script type="module" defer src="./scripts/FirebaseConfig.js"></script>
+    <script type="module" defer src="https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js"></script>
+    <script type="module" defer src="www.gstatic.com/firebasejs/12.17.1/firebase-database.js"></script>
+    <script type="module" defer src="./scripts/main.js"></script>
 
 </body>
 
