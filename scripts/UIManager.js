@@ -15,9 +15,9 @@ export default class UIManager {
         this.winModal = document.getElementById('win-modal');
         this.tutorialModal = document.getElementById('tutorial-modal');
         this.creditsModal = document.getElementById('credits-modal');
+        this.nameModal = document.getElementById('name-modal');
+        this.onlineModal = document.getElementById('online-modal');
 
-
-        this.difficultyOptions = document.getElementById('difficulty-options');
         this.btnModePvp = document.getElementById('btn-mode-pvp');
         this.btnModePve = document.getElementById('btn-mode-pve');
         this.diffButtons = document.querySelectorAll('.btn-diff');
@@ -27,10 +27,29 @@ export default class UIManager {
         this.btnPlayAgain = document.getElementById('btn-play-again');
         this.btnCredits = document.getElementById('btn-credits');
         this.btnCloseCredits = document.getElementById('btn-close-credits');
-
         this.btnExitLobby = document.getElementById('btn-exit-lobby');
+        this.btnConfirmName = document.getElementById('btn-confirm-name');
+        this.pvpOptions = document.getElementById('pvp-options');
+        this.btnPvpLocal = document.getElementById('btn-pvp-local');
+        this.btnPvpOnline = document.getElementById('btn-pvp-online');
+        this.btnCloseOnline = document.getElementById('btn-close-online');
+        this.btnCreateRoom = document.getElementById('btn-create-room');
+        this.btnJoinRoom = document.getElementById('btn-join-room');
+        this.btnCopyCode = document.getElementById('btn-copy-code');
+        this.btnCopyLink = document.getElementById('btn-copy-link');
+        this.btnConfirmJoin = document.getElementById('btn-confirm-join');
+
         this.winnerNameEl = document.getElementById('winner-name')
+        this.winTitleEl = document.getElementById('win-title');
         this.turnIndicator = document.getElementById('turn-indicator');
+        this.difficultyOptions = document.getElementById('difficulty-options');
+        this.inputPlayerName = document.getElementById('input-player-name');
+        this.roomCodeDisplay = document.getElementById('room-code-display');
+        this.inputRoomCode = document.getElementById('input-room-code');
+        this.joinError = document.getElementById('join-error');
+        this.readyRedName = document.getElementById('ready-red-name');
+        this.readyBlueName = document.getElementById('ready-blue-name');
+
 
         // Matriz visual para armazenar a referência das células no DOM
         this.cellElements = [];
@@ -163,6 +182,17 @@ export default class UIManager {
     }
 
     // --- CONTROLE DE MODAIS ---
+    showNameModal() {
+        if (this.nameModal) {
+            this.nameModal.classList.remove('hidden');
+        }
+    }
+
+    hideNameModal() {
+        if (this.nameModal) {
+            this.nameModal.classList.add('hidden');
+        }
+    }
 
     showTutorialModal() {
         if (this.tutorialModal) {
@@ -173,6 +203,11 @@ export default class UIManager {
             }
             this.tutorialModal.classList.remove('hidden');
         }
+    }
+
+    getPlayerNameInput() {
+        if (!this.inputPlayerName) return '';
+        return this.inputPlayerName.value.trim();
     }
 
     hideTutorialModal() {
@@ -202,14 +237,27 @@ export default class UIManager {
         }
     }
 
-    showWinModal(winner) {
-        if (this.winModal) {
-            if (this.winnerNameEl) {
-                this.winnerNameEl.classList.add(winner);
-                this.winnerNameEl.textContent = winner.toUpperCase();
-            }
-            this.winModal.classList.remove('hidden');
+    showWinModal(winner, outcome = 'generic') {
+        if (!this.winModal) return;
+
+
+        if (this.winnerNameEl) {
+            this.winnerNameEl.classList.add(winner);
+            this.winnerNameEl.textContent = winner.toUpperCase();
         }
+
+        if (this.winTitleEl) {
+            if (outcome === 'victory') {
+                this.winTitleEl.textContent = '🏆 Você Venceu!';
+            } else if (outcome) {
+                this.winTitleEl.textContent = '💀 Você Perdeu';
+            } else {
+                this.winTitleEl.textContent = '🏆 Vitória!';
+            }
+        }
+
+        this.winModal.classList.remove('hidden');
+
     }
 
     hideWinModal() {
@@ -230,6 +278,30 @@ export default class UIManager {
         }
     }
 
+    showPvpOptions() {
+        if (this.pvpOptions) this.pvpOptions.classList.remove('hidden');
+        if (this.difficultyOptions) this.difficultyOptions.classList.add('hidden');
+    }
+
+    showOnlineModal() {
+        if (this.onlineModal) this.onlineModal.classList.remove('hidden');
+    }
+
+    showOnlineStep(step) {
+        const steps = {
+            choice: document.getElementById('online-choice'),
+            waiting: document.getElementById('online-waiting'),
+            join: document.getElementById('online-join'),
+            ready: document.getElementById('online-ready')
+        };
+        Object.values(steps).forEach((el) => { if (el) el.classList.add('hidden'); });
+        if (steps[step]) steps[step].classList.remove('hidden');
+    }
+
+    hideOnlineModal() {
+        if (this.onlineModal) this.onlineModal.classList.add('hidden');
+    }
+
     clearActiveButtons(buttons) {
         buttons.forEach(btn => btn.classList.remove('btn-success'));
     }
@@ -237,5 +309,27 @@ export default class UIManager {
     setActiveButton(selectedButton, groupButtons) {
         this.clearActiveButtons(groupButtons);
         selectedButton.classList.add('btn-success');
+    }
+
+    setRoomCodeDisplay(code) {
+        if (this.roomCodeDisplay) this.roomCodeDisplay.textContent = code;
+    }
+
+    getJoinCodeInput() {
+        if (!this.inputRoomCode) return '';
+        return this.inputRoomCode.value.trim().toUpperCase();
+    }
+
+    setJoinCodeInput(code) {
+        if (this.inputRoomCode) this.inputRoomCode.value = code;
+    }
+
+    setJoinError(message) {
+        if (this.joinError) this.joinError.textContent = message || '';
+    }
+
+    setReadyPlayers(redName, blueName) {
+        if (this.readyRedName) this.readyRedName.textContent = redName;
+        if (this.readyBlueName) this.readyBlueName.textContent = blueName;
     }
 }

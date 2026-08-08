@@ -154,6 +154,40 @@ export default class AudioManager {
         });
     }
 
+    async playDefeatSound() {
+        if (this.isMuted) return;
+
+        const ctx = await this.ensureAudioContext();
+        if (!ctx) return;
+
+        const notes = [392.00, 349.23, 293.66]; // Sol, Fá, Ré
+        const now = ctx.currentTime;
+
+        notes.forEach((freq, index) => {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+
+            osc.type = 'sawtooth';
+            osc.frequency.value = freq;
+
+            const startTime = now + index * 0.18;
+            const duration = 0.35;
+
+            gain.gain.setValueAtTime(0.35, startTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
+
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+
+            osc.start(startTime);
+            osc.stop(startTime + duration);
+        })
+    }
+
+    vibrateDefeat() {
+        this.vibrate([200]);
+    }
+
     /**
      * Vibração no dispositivo móvel.
      * @param {number|Array<number>} pattern 

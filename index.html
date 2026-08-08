@@ -56,17 +56,32 @@
         </div>
     </div>
 
-    <!-- 2. MODAL DE SELEÇÃO DE MODO DE JOGO (LOBBY) -->
-    <div id="mode-modal" class="modal-overlay">
+    <!-- 2. MODAL DE USUÁRIO -->
+    <div id="name-modal" class="modal-overlay hidden">
+        <div class="modal-card">
+            <h2 id="win-title">👤 Como podemos te chamar?</h2>
+            <p class="modal-message">Esse nome vai aparecer pros seus adversários online.</p>
+            <input type="text" id="input-player-name" maxlength="16" placeholder="Seu nome" class="name-input">
+            <button id="btn-confirm-name" class="btn-primary" style="margin-top:15px;">Confirmar</button>
+        </div>
+    </div>
+
+    <!-- 3. MODAL DE SELEÇÃO DE MODO DE JOGO (LOBBY) -->
+    <div id="mode-modal" class="modal-overlay hidden">
         <div class="modal-card">
             <h2 class="modal-title">🎮 Modo de Jogo</h2>
             <p class="modal-message">Como você deseja jogar esta partida?</p>
 
-            <div class="mode-options" style="display: flex; flex-direction: column; gap: 10px; margin-top: 15px;">
-                <button id="btn-mode-pvp" class="btn-primary">👥 Jogador vs Jogador</button>
-                <button id="btn-mode-pve" class="btn-primary">🤖 Jogador vs CPU</button>
-            </div>
-
+            <br class="mode-options" style="display: flex; flex-direction: column; gap: 10px; margin-top: 15px;">
+            <button id="btn-mode-pvp" class="btn-primary">👥 Jogador vs Jogador</button>
+            <div id="pvp-options" class="difficulty-container hidden" style="margin-top:15px;">
+                <p class="modal-message">Como vocês vão jogar?</p>
+                <div style="display:flex; gap:10px; margin-top:8px;">
+                    <button id="btn-pvp-local" class="btn-secondary" style="flex: 1;">🏠 Local</button>
+                    <button id="btn-pvp-online" class="btn-secondary" style="flex: 1;">🌐 Online</button>
+                </div>
+            </div><br><br>
+            <button id="btn-mode-pve" class="btn-primary">🤖 Jogador vs CPU</button>
             <!-- Opções de Dificuldade da CPU (Visíveis apenas ao escolher jogar vs CPU) -->
             <div id="difficulty-options" class="difficulty-container hidden" style="margin-top: 15px;">
                 <p class="modal-message">Escolha o nível da CPU:</p>
@@ -76,9 +91,56 @@
                 </div>
             </div>
         </div>
+
+
+
+
+    </div>
     </div>
 
-    <!-- MODAL DE TUTORIAL INTERATIVO (ONBOARDING) -->
+    <!-- 4. MODAL ONLINE -->
+    <div id="online-modal" class="modal-overlay hidden">
+        <div class="modal-card">
+            <button id="btn-close-online" class="btn-close">&times;</button>
+            <h2 class="modal-title">🌐 Jogo Online</h2>
+
+            <div id="online-choice" style="display:flex;flex-direction:column;gap:10px">
+                <button id="btn-create-room" class="btn-primary">➕ Criar Partida</button>
+                <button id="btn-join-room" class="btn-primary">🔑 Entrar em Partida</button>
+            </div>
+
+            <div id="online-waiting" class="hidden">
+                <p class="modal-message">Compartilhe o código com seu amigo:</p>
+                <div id="room-code-display" class="room-code-display"></div>
+                <div style="display:flex; gap:10px; margin-top:10px;">
+                    <button id="btn-copy-code" class="btn-secondary" style="flex:1;">📋 Copiar Código</button>
+                    <button id="btn-copy-link" class="btn-secondary" style="flex:1;">🔗 Copiar Link</button>
+                </div>
+                <p class="modal-message" style="margin-top:15px; font-size:0.85rem;">Aguardando oponente entrar...</p>
+            </div>
+
+            <div id="online-join" class="hidden">
+                <p class="modal-message">Digite o código da sala:</p>
+                <input id="input-room-code" type="text" maxlength="6" placeholder="ABC123" class="name-input"
+                    style="text-transform:uppercase;">
+                <button id="btn-confirm-join" class="btn-primary" style="margin-top:12px; width:100%;">Entrar</button>
+                <p id="join-error" class="modal-message" style="color:#ef4444; font-size:0.85rem; margin-top:10px;"></p>
+            </div>
+
+            <div id="online-ready" class="hidden">
+                <p class="modal-message">✅ Sala pronta!</p>
+                <p class="modal-message" style="font-size:0.9rem;">
+                    🔴 <span id="ready-red-name"></span><br>
+                    🔵 <span id="ready-blue-name"></span>
+                </p>
+                <p class="modal-message" style="font-size:0.8rem; color:#94a3b8;">
+                    (sincronização das jogadas em tempo real é o próximo passo)
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4. MODAL DE TUTORIAL INTERATIVO (ONBOARDING) -->
     <div id="tutorial-modal" class="modal-overlay hidden">
         <div class="modal-card tutorial-card">
             <button id="btn-close-tutorial" class="btn-close">&times;</button>
@@ -98,7 +160,7 @@
         </div>
     </div>
 
-    <!-- MODAL DE CRÉDITOS -->
+    <!-- 5. MODAL DE CRÉDITOS -->
     <div id="credits-modal" class="modal-overlay hidden">
         <div class="modal-card credits-card">
             <button id="btn-close-credits" class="btn-close">&times;</button>
@@ -114,8 +176,6 @@
     </div>
 
     <script type="module" defer src="./scripts/FirebaseConfig.js"></script>
-    <script type="module" defer src="https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js"></script>
-    <script type="module" defer src="www.gstatic.com/firebasejs/12.17.1/firebase-database.js"></script>
     <script type="module" defer src="./scripts/main.js"></script>
 
 </body>

@@ -271,26 +271,7 @@ body {
 }
 
 /* ==========================================================================
-   6. MODAL IDENTIFICAÇÃO USUÁRIO
-   ========================================================================== */
-.name-input {
-    width: 100%;
-    padding: 12px;
-    border-radius: 8px;
-    border: 2px solid #334155;
-    background-color: #0f172a;
-    color: #f8fafc;
-    font-size: 1rem;
-    text-align: center;
-}
-
-.name-input:focus {
-    outline: none;
-    border-color: #38bdf8;
-}
-
-/* ==========================================================================
-   7. MODAL DE VITÓRIA
+   6. MODAL DE VITÓRIA
    ========================================================================== */
 
 .modal-overlay {
@@ -374,27 +355,8 @@ body {
     }
 }
 
-
 /* ==========================================================================
-   9. GAME JUICE - Animações e efeitos visuais
-   ==========================================================================
-*/
-
-.room-code-display {
-    font-size: 2rem;
-    font-weight: 800;
-    letter-spacing: 4px;
-    text-align: center;
-    padding: 16px;
-    background-color: #0f172a;
-    border: 2px solid #38bdf8;
-    border-radius: 8px;
-    color: #38bdf8;
-    margin-top: 10px;
-}
-
-/* ==========================================================================
-   10. GAME JUICE - Animações e efeitos visuais
+   7. GAME JUICE - Animações e efeitos visuais
    ==========================================================================
 */
 
