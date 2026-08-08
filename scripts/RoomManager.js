@@ -1,4 +1,4 @@
-import { database, get, ref, set, update, onValue } from "./FirebaseConfig.js";
+import { database, get, ref, set, update, onValue, onDisconnect } from "./FirebaseConfig.js";
 
 const ROOM_CODE_LENGTH = 6;
 
@@ -119,5 +119,59 @@ export default class RoomManager {
             throw new Error('Jogador ainda não tem perfil - chame playerManager.init(nome) antes de criar/entrar em uma sala.');
         }
         return profile;
+    }
+
+    trackPresence() {
+        if (!this.roomCode || !this.localColor) return;
+        const presenceRef = ref(database, `rooms/${this.roomCode}/players/${this.localColor}/connected`);
+        set(presenceRef, true);
+        onDisconnect(presenceRef).set(false);
+    }
+
+    async isOpponentConnected() {
+        const room = await this.getRoomData();
+        const opponentColor = this.localColor === 'red' ? 'blue' : 'red';
+        return !!(room.players?.[opponentColor]?.connected);
+    }
+
+    async requestRematch() {
+        await set(ref(database, `rooms/${this.roomCode}/rematch`), {
+            status: 'pending',
+            requestedBy: this.localColor
+        });
+    }
+
+    async respondToRematch(accept) {
+        if (!accept) {
+            await update(ref(database, `rooms/${this.roomCode}/rematch`), { status: 'declined' });
+            return;
+        }
+
+        const room = await this.getRoomData();
+        const swappedPlayers = { red: room.players.blue, blue: room.players.red };
+
+        await update(ref(database, `rooms/${this.roomCode}`), {
+            players: swappedPlayers,
+            moves: null,
+            status: 'playing',
+            winner: null,
+            ratingApplied: false,
+            rematch: { status: 'accepted', requestedBy: null }
+        });
+    }
+
+    async clearRematchRequest() {
+        await set(ref(database, `rooms/${this.roomCode}/rematch`), { status: null, requestedBy: null });
+    }
+
+    onRematchUpdate(callback) {
+        if (!this.roomCode) return () => { };
+        const rematchRef = ref(database, `rooms/${this.roomCode}/rematch`);
+        return onValue(rematchRef, (snapshot) => callback(snapshot.val()));
+    }
+
+    async syncLocalColorAfterRematch() {
+        const room = await this.getRoomData();
+        this.localColor = room.players.red.uid === this.playerManager.uid ? 'red' : 'blue';
     }
 }

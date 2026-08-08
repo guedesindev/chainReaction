@@ -102,9 +102,15 @@ function setupEventListeners() {
 function startNewGame() {
     setupEventListeners();
     bot = gameMode === 'pve' ? new Bot('blue', cpuDifficulty) : null;
-    onlineManager = gameMode === 'online' ? new OnlineManager(board, roomManager) : null;
 
-    if (onlineManager) onlineManager.start();
+    if (gameMode === 'online') {
+        if (!onlineManager) {
+            onlineManager = new OnlineManager(board, roomManager);
+            onlineManager.start();
+        }
+    } else {
+        onlineManager = null;
+    }
 
     board.reset(); // Isso vai disparar o evento 'board:reset', ativando a reconstrução e renderização da tela!
 }
@@ -172,10 +178,11 @@ if (uiManager.btnCreateRoom) {
             uiManager.setRoomCodeDisplay(code);
             uiManager.showOnlineStep('waiting');
 
-            const unsubscribe = roomManager.onRoomUpdate((room) => {
+            const unsubscribe = roomManager.onRoomUpdate(async (room) => {
                 if (room && room.status === 'playing' && room.players?.blue) {
                     gameMode = 'online';
                     uiManager.hideOnlineModal();
+                    attachRematchListener()
                     startNewGame();
                     unsubscribe();
                 }
@@ -203,8 +210,9 @@ if (uiManager.btnConfirmJoin) {
             await roomManager.joinRoom(code);
             const roomData = await roomManager.getRoomData();
             uiManager.setReadyPlayers(roomData.players.red.displayName, roomData.players.blue.displayName);
-            gameMode = 'online',
-                uiManager.hideOnlineModal();
+            gameMode = 'online';
+            uiManager.hideOnlineModal();
+            attachRematchListener()
             startNewGame();
         } catch (e) {
             uiManager.setJoinError(e.message);
@@ -277,15 +285,25 @@ if (uiManager.btnReset) {
 }
 
 if (uiManager.btnPlayAgain) {
-    uiManager.btnPlayAgain.addEventListener('click', () => {
+    uiManager.btnPlayAgain.addEventListener('click', async () => {
         uiManager.hideWinModal();
-        startNewGame()
+
+        if (gameMode === 'online' && roomManager) {
+            const opponentConnected = await roomManager.isOpponentConnected();
+            if (!opponentConnected) {
+                uiManager.showRematchStatus('Seu adversário não está mais disponível.');
+                return;
+            }
+            await roomManager.requestRematch();
+            uiManager.showRematchStatus('Pedido enviado. Aguardando resposta do adversário...');
+        } else {
+            startNewGame()
+        }
     })
 }
 
 if (uiManager.btnExitLobby) {
     uiManager.btnExitLobby.addEventListener('click', () => {
-        console.log("Saindo para o Lobby")
         uiManager.hideWinModal()
         uiManager.showModeModal()
     })
@@ -300,6 +318,26 @@ if (uiManager.btnCredits) {
 if (uiManager.btnCloseCredits) {
     uiManager.btnCloseCredits.addEventListener('click', () => {
         uiManager.hideCreditsModal();
+    })
+}
+
+if (uiManager.btnAcceptRematch) {
+    uiManager.btnAcceptRematch.addEventListener('click', () => {
+        roomManager.respondToRematch(true);
+        uiManager.hideRematchUI();
+        uiManager.hideWinModal();
+    });
+}
+
+if (uiManager.btnDeclineRematch) {
+    uiManager.btnDeclineRematch.addEventListener('click', () => {
+        roomManager.respondToRematch(false);
+        uiManager.showRematchStatus('Você recusou a revanche. \nVoltando para o lobby...');
+        board.reset();
+        setInterval(() => {
+            uiManager.hideRematchUI();
+            uiManager.showModeModal();
+        }, 3000);
     })
 }
 
@@ -332,6 +370,40 @@ function proceedAfterIdentity() {
     } else {
         uiManager.showModeModal();
     }
+}
+
+function attachRematchListener() {
+    roomManager.onRematchUpdate(async (rematch) => {
+
+        if (!rematch || rematch.status === 'none') return;
+
+        if (rematch.status === 'pending') {
+            if (rematch.requestedBy === roomManager.localColor) {
+                uiManager.showRematchStatus('Pedido enviado. Aguardando resposta do adversário...');
+            } else {
+                uiManager.showRematchPrompt();
+            }
+            return;
+        }
+
+        if (rematch.status === 'declined' && rematch.requestedBy === roomManager.localColor) {
+            uiManager.showRematchStatus('Revanche recusada.');
+            setInterval(() => {
+                board.reset()
+                uiManager.hideRematchUI()
+                uiManager.showModeModal();
+            }, 3000);
+            await roomManager.clearRematchRequest();
+            return;
+        }
+
+        if (rematch.status === 'accepted') {
+            await roomManager.syncLocalColorAfterRematch();
+            uiManager.hideRematchUI();
+            startNewGame();
+            await roomManager.clearRematchRequest();
+        }
+    });
 }
 
 initApp();

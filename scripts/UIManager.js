@@ -17,6 +17,7 @@ export default class UIManager {
         this.creditsModal = document.getElementById('credits-modal');
         this.nameModal = document.getElementById('name-modal');
         this.onlineModal = document.getElementById('online-modal');
+        this.rematchModal = document.getElementById('rematch-modal');
 
         this.btnModePvp = document.getElementById('btn-mode-pvp');
         this.btnModePve = document.getElementById('btn-mode-pve');
@@ -38,6 +39,8 @@ export default class UIManager {
         this.btnCopyCode = document.getElementById('btn-copy-code');
         this.btnCopyLink = document.getElementById('btn-copy-link');
         this.btnConfirmJoin = document.getElementById('btn-confirm-join');
+        this.btnAcceptRematch = document.getElementById('btn-accept-rematch');
+        this.btnDeclineRematch = document.getElementById('btn-decline-rematch');
 
         this.winnerNameEl = document.getElementById('winner-name')
         this.winTitleEl = document.getElementById('win-title');
@@ -49,6 +52,8 @@ export default class UIManager {
         this.joinError = document.getElementById('join-error');
         this.readyRedName = document.getElementById('ready-red-name');
         this.readyBlueName = document.getElementById('ready-blue-name');
+        this.rematchMessage = document.getElementById('rematch-message');
+        this.rematchActions = document.getElementById('rematch-actions');
 
 
         // Matriz visual para armazenar a referência das células no DOM
@@ -284,7 +289,10 @@ export default class UIManager {
     }
 
     showOnlineModal() {
-        if (this.onlineModal) this.onlineModal.classList.remove('hidden');
+        if (this.onlineModal) {
+            this.onlineModal.classList.remove('hidden');
+            this.setRoomCodeDisplay('')
+        }
     }
 
     showOnlineStep(step) {
@@ -299,7 +307,26 @@ export default class UIManager {
     }
 
     hideOnlineModal() {
-        if (this.onlineModal) this.onlineModal.classList.add('hidden');
+        if (this.onlineModal) {
+            this.setRoomCodeDisplay('')
+            this.onlineModal.classList.add('hidden');
+        }
+    }
+
+    showRematchStatus(message) {
+        if (this.rematchMessage) this.rematchMessage.textContent = message;
+        if (this.rematchActions) { this.rematchActions.classList.add('hidden'); this.rematchActions.style.display = "none"; }
+        if (this.rematchModal) this.rematchModal.classList.remove('hidden');
+    }
+
+    showRematchPrompt() {
+        if (this.rematchMessage) this.rematchMessage.textContent = 'Seu adversário quer revanche!';
+        if (this.rematchActions) { this.rematchActions.classList.remove('hidden'); this.rematchActions.style.display = 'flex'; }
+        if (this.rematchModal) this.rematchModal.classList.remove('hidden');
+    }
+
+    hideRematchUI() {
+        if (this.rematchModal) this.rematchModal.classList.add('hidden');
     }
 
     clearActiveButtons(buttons) {

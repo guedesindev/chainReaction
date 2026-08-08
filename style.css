@@ -316,6 +316,12 @@ body {
     pointer-events: none;
 }
 
+.hide {
+    display: none;
+    opacity: 0;
+    pointer-events: none;
+}
+
 .modal-card {
     background-color: #1e293b;
     border: 2px solid #334155;
@@ -593,6 +599,11 @@ body {
     font-weight: 600;
     cursor: pointer;
     flex: 1;
+}
+
+.btn-secondary:hover {
+    background-color: #54647b;
+    transition: background-color 0.2s ease, transform 0.1s ease, border-color 0.2s ease;
 }
 
 #btn-next-slide {

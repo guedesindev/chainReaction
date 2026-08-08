@@ -70,7 +70,7 @@
     <div id="mode-modal" class="modal-overlay hidden">
         <div class="modal-card">
             <h2 class="modal-title">🎮 Modo de Jogo</h2>
-            <p class="modal-message">Como você deseja jogar esta partida?</p>
+            <p class="modal-message">Escolha modo de jogo para hoje!</p>
 
             <br class="mode-options" style="display: flex; flex-direction: column; gap: 10px; margin-top: 15px;">
             <button id="btn-mode-pvp" class="btn-primary">👥 Jogador vs Jogador</button>
@@ -91,11 +91,6 @@
                 </div>
             </div>
         </div>
-
-
-
-
-    </div>
     </div>
 
     <!-- 4. MODAL ONLINE -->
@@ -106,20 +101,23 @@
 
             <div id="online-choice" style="display:flex;flex-direction:column;gap:10px">
                 <button id="btn-create-room" class="btn-primary">➕ Criar Partida</button>
-                <button id="btn-join-room" class="btn-primary">🔑 Entrar em Partida</button>
+                <div id="online-waiting">
+                    <p class="modal-message">Compartilhe o código com seu amigo:</p>
+                    <div id="room-code-display" class="room-code-display"></div>
+                    <div style="display:flex; gap:10px; margin-top:10px;">
+                        <button id="btn-copy-code" class="btn-secondary" style="flex:1;">📋 Copiar Código</button>
+                        <button id="btn-copy-link" class="btn-secondary" style="flex:1;">🔗 Copiar Link</button>
+                    </div>
+                    <p id="room-status" class="modal-message" style="margin-top:15px; font-size:0.85rem;">
+                        Aguardando
+                        oponente entrar...
+                    </p>
+                </div>
             </div>
 
-            <div id="online-waiting" class="hidden">
-                <p class="modal-message">Compartilhe o código com seu amigo:</p>
-                <div id="room-code-display" class="room-code-display"></div>
-                <div style="display:flex; gap:10px; margin-top:10px;">
-                    <button id="btn-copy-code" class="btn-secondary" style="flex:1;">📋 Copiar Código</button>
-                    <button id="btn-copy-link" class="btn-secondary" style="flex:1;">🔗 Copiar Link</button>
-                </div>
-                <p class="modal-message" style="margin-top:15px; font-size:0.85rem;">Aguardando oponente entrar...</p>
-            </div>
 
             <div id="online-join" class="hidden">
+                <button id="btn-join-room" class="btn-primary">🔑 Entrar em Partida</button>
                 <p class="modal-message">Digite o código da sala:</p>
                 <input id="input-room-code" type="text" maxlength="6" placeholder="ABC123" class="name-input"
                     style="text-transform:uppercase;">
@@ -136,6 +134,19 @@
                 <p class="modal-message" style="font-size:0.8rem; color:#94a3b8;">
                     (sincronização das jogadas em tempo real é o próximo passo)
                 </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 5. MODAL DE REVANCHE -->
+    <div id="rematch-modal" class="modal-overlay hidden">
+        <div class="modal-card">
+            <div id="online-ready" class="hidden">
+                <p id="rematch-message" class="modal-message">⌛ Aguardando resposta do adversário...</p>
+                <div id="rematch-actions" class="hidden" style="display:flex; gap:10px; margin-top:15px;">
+                    <button id="btn-accept-rematch" class="btn-primary" style="flex:1">✅ Aceitar</button>
+                    <button id="btn-decline-rematch" class="btn-secondary" style="flex:1">❌ Recusar</button>
+                </div>
             </div>
         </div>
     </div>
