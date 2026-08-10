@@ -141,7 +141,7 @@ async function getRatingToShow(ratingData) {
     const { loser, winner } = ratingData;
     const uid = playerManager.uid;
 
-    if (loser.uid === uid) return losar.newRating;
+    if (loser.uid === uid) return loser.newRating;
     if (winner.uid === uid) return winner.newRating
 
     return '';
