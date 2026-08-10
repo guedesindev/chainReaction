@@ -44,6 +44,7 @@ export default class UIManager {
 
         this.winnerNameEl = document.getElementById('winner-name')
         this.winTitleEl = document.getElementById('win-title');
+        this.winRatingValue = document.getElementById('win-rating-value');
         this.turnIndicator = document.getElementById('turn-indicator');
         this.difficultyOptions = document.getElementById('difficulty-options');
         this.inputPlayerName = document.getElementById('input-player-name');

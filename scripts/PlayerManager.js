@@ -25,9 +25,9 @@ export default class PlayerManager {
             this.profile = {
                 displayName: displayName || 'Jogador',
                 rating: DEFAULT_RATING,
-                gamesPlayer: 0,
+                gamesPlayed: 0,
                 wins: 0,
-                loses: 0,
+                losses: 0,
                 createdAt: Date.now()
             };
             await set(profileRef, this.profile);
@@ -39,6 +39,13 @@ export default class PlayerManager {
         if (!this.uid) return;
         this.profile.displayName = displayName;
         await set(ref(database, `players/${this.uid}/displayName`), displayName);
+    }
+
+    async getPlayerData(uid, dataRef) {
+        const snapshot = await get(ref(database, `players/${uid}/${dataRef}`))
+        if (snapshot.exists()) {
+            return snapshot.val()
+        }
     }
 }
 

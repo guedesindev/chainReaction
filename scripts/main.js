@@ -10,6 +10,7 @@ import eventManager from './EventManager.js';
 import { audioManager } from './AudioManager.js';
 import Firebase from './Firebase.js';
 import PlayerManager, { playerManager } from './PlayerManager.js';
+import { ratingManager } from './RatingManager.js';
 import RoomManager from './RoomManager.js';
 import OnlineManager from './OnlineManager.js';
 
@@ -71,30 +72,34 @@ function setupEventListeners() {
     });
 
     // Escuta fim de jogo
-    eventManager.subscribe('game:over', (data) => {
-
+    eventManager.subscribe('game:over', async (data) => {
         audioManager.stopBackgroundMusic();
-        if (gameMode === 'online' && roomManager) {
-            const isLocalWinner = data.winner === roomManager.localColor;
 
-            if (isLocalWinner) {
-                audioManager.playVictorySound();
-                audioManager.vibrateVictory();
-            } else {
-                audioManager.playDefeatSound();
-                audioManager.vibrateDefeat();
-            }
+        const isOnline = gameMode === 'online' && roomManager;
 
-            uiManager.showWinModal(data.winner, isLocalWinner ? 'victory' : 'defeat');
-        } else {
+        if (!isOnline) {
             audioManager.playVictorySound();
             audioManager.vibrateVictory();
             uiManager.showWinModal(data.winner, 'generic')
+            return;
         }
-        // // audioManager.playVictorySound()
-        // if (typeof uiManager.showWinModal === 'function') {
-        //     uiManager.showWinModal(data.winner);
-        // }
+
+        const isLocalWinner = data.winner === roomManager.localColor;
+
+        if (isLocalWinner) {
+            audioManager.playVictorySound();
+            audioManager.vibrateVictory();
+        } else {
+            audioManager.playDefeatSound();
+            audioManager.vibrateDefeat();
+        }
+
+        uiManager.showWinModal(data.winner, isLocalWinner ? 'victory' : 'defeat');
+
+        const ratingData = await ratingManager.applyMatchResult(roomManager.roomCode, data.winner);
+        const ratingToShow = await getRatingToShow(ratingData)
+
+        uiManager.winRatingValue.textContent = ratingToShow
     });
 }
 
@@ -126,6 +131,20 @@ function maybeTriggerBotMove(currentPlayer) {
             board.makeMove(move.row, move.col);
         }
     }, 600);
+}
+
+async function getRatingToShow(ratingData) {
+    if (!ratingData) {
+        return await playerManager.getPlayerData(playerManager.uid, 'rating');
+    }
+
+    const { loser, winner } = ratingData;
+    const uid = playerManager.uid;
+
+    if (loser.uid === uid) return losar.newRating;
+    if (winner.uid === uid) return winner.newRating
+
+    return '';
 }
 
 // 4. Configuração dos Eventos da Interface de Usuário (Botões)

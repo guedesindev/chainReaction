@@ -351,6 +351,13 @@ body {
     text-transform: uppercase;
 }
 
+.win-rating {}
+
+#win-rating-value {
+    font-weight: 700;
+    color: #FFFFFF;
+}
+
 .red {
     color: #ef4444;
 }
