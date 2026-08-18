@@ -5,6 +5,7 @@
 
 import Tutorial from './Tutorial.js';
 import eventManager from './EventManager.js';
+import { playerManager } from './PlayerManager.js';
 
 export default class UIManager {
     constructor() {
@@ -42,6 +43,12 @@ export default class UIManager {
         this.btnAcceptRematch = document.getElementById('btn-accept-rematch');
         this.btnDeclineRematch = document.getElementById('btn-decline-rematch');
 
+        this.hostCard = document.getElementById('host-card');
+        this.hostName = document.getElementById('host-name');
+        this.hostScore = document.getElementById('host-score');
+        this.guestCard = document.getElementById('guest-card');
+        this.guestName = document.getElementById('guest-name');
+        this.guestScore = document.getElementById('guest-score');
         this.winnerNameEl = document.getElementById('winner-name')
         this.winTitleEl = document.getElementById('win-title');
         this.winRatingValue = document.getElementById('win-rating-value');
@@ -51,10 +58,14 @@ export default class UIManager {
         this.roomCodeDisplay = document.getElementById('room-code-display');
         this.inputRoomCode = document.getElementById('input-room-code');
         this.joinError = document.getElementById('join-error');
+        this.statusRoom = document.getElementById("status-room");
         this.readyRedName = document.getElementById('ready-red-name');
         this.readyBlueName = document.getElementById('ready-blue-name');
         this.rematchMessage = document.getElementById('rematch-message');
         this.rematchActions = document.getElementById('rematch-actions');
+        this.WinHostScore = document.getElementById("win-host-score")
+        this.WinGuestScore = document.getElementById("win-guest-score")
+
 
 
         // Matriz visual para armazenar a referência das células no DOM
@@ -136,7 +147,8 @@ export default class UIManager {
                     cellElement.classList.add(`player-${owner}`);
                 }
 
-                this.updateCellOrbs(cellElement, orbCount, owner, isCritical);
+                // this.updateCellOrbs(cellElement, orbCount, owner, isCritical);
+                this.updateSingleCell(r, c, orbCount, owner, isCritical);
             });
         });
     }
@@ -176,6 +188,14 @@ export default class UIManager {
         cellElement.appendChild(orbContainer);
     }
 
+    updateSingleCell(row, col, count, owner, isCritical) {
+        const cellElement = this.boardContainer.querySelector(`[data-row="${row}"][data-col="${col}"]`);
+
+        if (!cellElement) return;
+
+        this.updateCellOrbs(cellElement, count, owner, isCritical);
+    }
+
     /**
      * Atualiza a indicação textual do jogador da vez.
      * @param {string} currentPlayer 
@@ -183,7 +203,7 @@ export default class UIManager {
     updateTurnIndicator(currentPlayer) {
         if (this.turnIndicator) {
             this.turnIndicator.textContent = `Vez do Jogador: ${currentPlayer.toUpperCase()}`;
-            this.turnIndicator.className = `turn-indicator player-${currentPlayer}`;
+            this.turnIndicator.className = `turn-badge player-${currentPlayer}`;
         }
     }
 
@@ -343,6 +363,10 @@ export default class UIManager {
         if (this.roomCodeDisplay) this.roomCodeDisplay.textContent = code;
     }
 
+    setScoreWinModal() {
+        //pass
+    }
+
     getJoinCodeInput() {
         if (!this.inputRoomCode) return '';
         return this.inputRoomCode.value.trim().toUpperCase();
@@ -354,6 +378,21 @@ export default class UIManager {
 
     setJoinError(message) {
         if (this.joinError) this.joinError.textContent = message || '';
+    }
+
+    setStatusRoom(roomData) {
+        if (!roomData) return;
+        const players = Object.keys(roomData.players)
+        let qtdPlayers = players.length
+
+        if (qtdPlayers < 2) {
+            this.statusRoom.textContent = '⌛ Aguardando adversário...';
+            this.readyRedName.textContent = playerManager.profile.displayName;
+        } else if (qtdPlayers === 2) {
+            this.statusRoom.textContent = '✅ Sala pronta!';
+            this.readyRedName.textContent = roomData.players.host.displayName;
+            this.readyBlueName.textContent = playerManager.profile.displayName;
+        }
     }
 
     setReadyPlayers(redName, blueName) {

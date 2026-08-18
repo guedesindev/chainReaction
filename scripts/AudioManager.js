@@ -102,21 +102,75 @@ export default class AudioManager {
         const ctx = await this.ensureAudioContext();
         if (!ctx || ctx.state !== 'running') return;
 
+        const now = ctx.currentTime;
+
+        // --------------------------------------------------
+        // PARAMETROS DE VARIABILIDADE (Randomização)
+        // --------------------------------------------------
+        // Helper para gerar número aleatório em um intervalo
+        const random = (min, max) => Math.random() * (max - min) + min;
+
+        // 1. Variação de Duração: entre 0.35s e 0.55s
+        const duration = random(0.35, 0.55);
+
+        // 2. Variação de Pitch do Sub-Bass: frequência inicial varia entre 120Hz e 190Hz
+        const startFreq = random(120, 190);
+
+        // 3. Variação de Filtro do Ruído: frequência inicial entre 600Hz e 1100Hz
+        const filterFreq = random(600, 1100);
+
+        // 4. Variação na velocidade de reprodução do ruído (altera o pitch do chiado)
+        const noisePlaybackRate = random(0.85, 1.15);
+
+        // --------------------------------------------------
+        // 1. CAMADA DE RUÍDO (Randomizada)
+        // --------------------------------------------------
+        const bufferSize = ctx.sampleRate * duration;
+        const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+        const data = buffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i++) {
+            data[i] = Math.random() * 2 - 1;
+        }
+
+        const noise = ctx.createBufferSource();
+        noise.buffer = buffer;
+        noise.playbackRate.value = noisePlaybackRate; // Aplica variação de velocidade no ruído
+
+        const filter = ctx.createBiquadFilter();
+        filter.type = 'lowpass';
+        filter.frequency.setValueAtTime(filterFreq, now); // Frequência inicial aleatória
+        filter.frequency.exponentialRampToValueAtTime(20, now + duration);
+
+        const noiseGain = ctx.createGain();
+        noiseGain.gain.setValueAtTime(0.7, now);
+        noiseGain.gain.exponentialRampToValueAtTime(0.01, now + duration);
+
+        noise.connect(filter);
+        filter.connect(noiseGain);
+        noiseGain.connect(ctx.destination);
+
+        // --------------------------------------------------
+        // 2. CAMADA DE SUB-BASS (Randomizada)
+        // --------------------------------------------------
         const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
+        const oscGain = ctx.createGain();
 
-        osc.type = 'triangle';
-        osc.frequency.setValueAtTime(120, ctx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(30, ctx.currentTime + 0.2);
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(startFreq, now); // Pitch inicial aleatório
+        osc.frequency.exponentialRampToValueAtTime(10, now + duration);
 
-        gain.gain.setValueAtTime(0.3, ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.2);
+        oscGain.gain.setValueAtTime(0.5, now);
+        oscGain.gain.exponentialRampToValueAtTime(0.01, now + duration);
 
-        osc.connect(gain);
-        gain.connect(ctx.destination);
+        osc.connect(oscGain);
+        oscGain.connect(ctx.destination);
 
-        osc.start();
-        osc.stop(ctx.currentTime + 0.2);
+        // Dispara as duas camadas
+        noise.start(now);
+        osc.start(now);
+
+        noise.stop(now + duration);
+        osc.stop(now + duration);
     }
 
     /**
@@ -185,7 +239,7 @@ export default class AudioManager {
     }
 
     vibrateDefeat() {
-        this.vibrate([200]);
+        this.vibrate([150, 50, 100, 50, 300]);
     }
 
     /**
@@ -203,15 +257,15 @@ export default class AudioManager {
     }
 
     vibrateMove() {
-        this.vibrate(12);
+        this.vibrate(25);
     }
 
     vibrateExplosion() {
-        this.vibrate([30, 20, 30]);
+        this.vibrate([40, 30, 80]);
     }
 
     vibrateVictory() {
-        this.vibrate([100, 50, 100, 50, 200]);
+        this.vibrate([200, 50, 100, 50, 300]);
     }
 }
 

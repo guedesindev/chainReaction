@@ -21,7 +21,7 @@ export default class RatingManager {
         return { newRating: player.rating + delta, delta };
     }
 
-    async applyMatchResult(roomCode, winnerColor) {
+    async applyMatchResult(roomCode, matchCode, winnerColor) {
         const ratingAppliedRef = ref(database, `rooms/${roomCode}/ratingApplied`);
 
         const transactionResult = await runTransaction(ratingAppliedRef, (current) => {
@@ -35,8 +35,10 @@ export default class RatingManager {
         const room = roomSnap.val();
 
         const loserColor = winnerColor === 'red' ? 'blue' : 'red';
-        const winnerUid = room.players[winnerColor].uid;
-        const loserUid = room.players[loserColor].uid;
+        let host = room.players.host;
+        let guest = room.players.guest;
+        const winnerUid = host.color === winnerColor ? host.uid : guest.uid;
+        const loserUid = guest.color === winnerColor ? guest.uid : host.uid;
 
         const [winnerSnap, loserSnap] = await Promise.all([
             get(ref(database, `players/${winnerUid}`)),
@@ -48,6 +50,11 @@ export default class RatingManager {
 
         const winnerResult = this.calculateNewRating(winnerProfile, loserProfile, true);
         const loserResult = this.calculateNewRating(loserProfile, winnerProfile, false);
+
+        await update(ref(database, `rooms/${roomCode}/matches/${matchCode}`), {
+            winner: winnerUid,
+            currentPlayer: null
+        })
 
         await update(ref(database, `players/${winnerUid}`), {
             rating: winnerResult.newRating,

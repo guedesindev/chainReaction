@@ -30,12 +30,17 @@ export default class Board {
         }
     }
 
+    setCurrentPlayer(playerColor) {
+        this.currentPlayer = playerColor;
+        eventManager.publish('turn:changed', { currentPlayer: this.currentPlayer })
+    }
+
     /**
      * 
      * @returns {string}
      */
     getCurrentPlayer() {
-        return this.players[this.currentPlayerIndex]
+        return this.currentPlayer;
     }
 
     /**
@@ -63,7 +68,7 @@ export default class Board {
 
 
         if (needsExplosion) {
-            this.processChainReaction(cell)
+            await this.processChainReaction(cell)
         } else {
             this.finishTurn()
         }
@@ -122,6 +127,11 @@ export default class Board {
                 // addOrb retorna TRUE apenas se o vizinho ultrapassar a capacidade limite!
                 const willExplode = neighborCell.addOrb(attackerPlayer);
 
+                eventManager.publish('cell:updated', {
+                    row: neighborCell.row,
+                    col: neighborCell.col
+                })
+
                 // Se o vizinho atingiu a capacidade crítica, entra na fila para explodir na sequência
                 if (willExplode && !explosionQueue.includes(neighborCell)) {
                     explosionQueue.push(neighborCell);
@@ -129,7 +139,7 @@ export default class Board {
             });
 
             // 5. Atualiza a tela com o estado atual das esferas
-            eventManager.publish('board:move', {});
+            // eventManager.publish('board:move', {});
 
             // ⏱️ Pausa de 120ms para criar a animação em ondas e dar o efeito de Game Juice!
             await this.delay(120);
@@ -144,6 +154,8 @@ export default class Board {
         if (currentIteration >= maxSafetyIterations) {
             console.warn('[⚠️ Alerta] Reação em cadeia interrompida pela trava de segurança.');
         }
+
+        eventManager.publish('chain:completed');
 
         this.finishTurn();
     }
@@ -208,13 +220,7 @@ export default class Board {
             return
         }
 
-        this.currentPlayerIndex = (this.currentPlayerIndex + 1) % this.players.length;
-
         this.isProcessing = false;
-
-        eventManager.publish('turn:changed', {
-            currentPlayer: this.getCurrentPlayer()
-        })
     }
 
     /**

@@ -8,17 +8,16 @@ import Bot from './Bot.js';
 import UIManager from './UIManager.js';
 import eventManager from './EventManager.js';
 import { audioManager } from './AudioManager.js';
-import Firebase from './Firebase.js';
 import PlayerManager, { playerManager } from './PlayerManager.js';
 import { ratingManager } from './RatingManager.js';
 import RoomManager from './RoomManager.js';
 import OnlineManager from './OnlineManager.js';
+import { database, ref, onValue } from './FirebaseConfig.js';
 
 // 1. Instâncias Globais
 const board = new Board();
 const uiManager = new UIManager();
 const MUSIC_SRC = './assets/audio/decisions.mp3';
-const firebase = new Firebase();
 const PLAYER_NAME_KEY = 'chain_reaction_player_name';
 
 let gameMode = 'pvp';
@@ -45,23 +44,59 @@ function setupEventListeners() {
     eventManager.subscribe('cell:clicked', ({ row, col }) => {
         if (gameMode === 'online') {
             if (!roomManager || board.getCurrentPlayer() !== roomManager.localColor) return;
-            board.makeMove(row, col);
+            // board.makeMove(row, col);
             onlineManager.submitLocalMove(row, col);
+            return;
         }
         board.makeMove(row, col);
     });
 
     // Escuta quando uma jogada ou movimento é realizado
-    eventManager.subscribe('board:move', () => {
+    eventManager.subscribe('board:move', ({ row, col, player }) => {
         audioManager.playPopSound();
         audioManager.vibrateMove();
-        uiManager.renderBoard(board.grid);
+        // uiManager.renderBoard(board.grid);
+
+        if (row !== undefined && col !== undefined) {
+            const cell = board.grid[row]?.[col];
+            if (cell) {
+                const orbCount = cell.orbs !== undefined ? cell.orbs : (cell.count || 0);
+                const isCritical = orbCount > 0 && orbCount === cell.maxCapacity;
+
+                uiManager.updateSingleCell(row, col, orbCount, player, isCritical);
+            }
+        }
     });
 
     // Escuta quando uma célula explode
-    eventManager.subscribe('cell:exploded', () => {
+    eventManager.subscribe('cell:exploded', ({ row, col }) => {
         audioManager.playExplosionSound();
         audioManager.vibrateVictory()
+
+        const cell = board.grid[row]?.[col];
+        if (cell) {
+            const orbCount = cell.orbs !== undefined ? cell.orbs : (cell.count || 0);
+            const isCritical = orbCount > 0 && orbCount === cell.maxCapacity;
+
+            uiManager.updateSingleCell(row, col, orbCount, cell.owner, isCritical);
+        }
+
+        uiManager.boardContainer.classList.add('shake')
+        setTimeout(() => {
+            uiManager.boardContainer.classList.remove('shake')
+        }, 300)
+    });
+
+    eventManager.subscribe('cell:updated', ({ row, col }) => {
+        const cell = board.grid[row]?.[col];
+        if (cell) {
+            const orbCount = cell.orbs !== undefined ? cell.orbs : (cell.count || 0);
+            const isCritical = orbCount > 0 && orbCount === cell.maxCapacity;
+            uiManager.updateSingleCell(row, col, orbCount, cell.owner, isCritical);
+        }
+    })
+
+    eventManager.subscribe('chain:completed', () => {
         uiManager.renderBoard(board.grid);
     });
 
@@ -77,46 +112,54 @@ function setupEventListeners() {
 
         const isOnline = gameMode === 'online' && roomManager;
 
-        if (!isOnline) {
-            audioManager.playVictorySound();
-            audioManager.vibrateVictory();
-            uiManager.showWinModal(data.winner, 'generic')
-            return;
-        }
+        updateScoreBoardUI()
 
-        const isLocalWinner = data.winner === roomManager.localColor;
+        setTimeout(async () => {
+            if (!isOnline) {
+                audioManager.playVictorySound();
+                audioManager.vibrateVictory();
+                uiManager.showWinModal(data.winner, 'generic');
+                roomManager.setScoreWinModal();
+                return
+            }
 
-        if (isLocalWinner) {
-            audioManager.playVictorySound();
-            audioManager.vibrateVictory();
-        } else {
-            audioManager.playDefeatSound();
-            audioManager.vibrateDefeat();
-        }
+            const isLocalWinner = data.winner === roomManager.localColor;
 
-        uiManager.showWinModal(data.winner, isLocalWinner ? 'victory' : 'defeat');
+            if (isLocalWinner) {
+                audioManager.playVictorySound();
+                audioManager.vibrateVictory();
+            } else {
+                audioManager.playDefeatSound();
+                audioManager.vibrateDefeat();
+            }
 
-        const ratingData = await ratingManager.applyMatchResult(roomManager.roomCode, data.winner);
-        const ratingToShow = await getRatingToShow(ratingData)
+            uiManager.showWinModal(data.winner, isLocalWinner ? 'victory' : 'defeat');
 
-        uiManager.winRatingValue.textContent = ratingToShow
+            const ratingData = await ratingManager.applyMatchResult(roomManager.roomCode, roomManager.matchCode, data.winner);
+            const ratingToShow = await getRatingToShow(ratingData)
+
+            uiManager.winRatingValue.textContent = ratingToShow
+        }, 1200);
+
+
     });
 }
 
 // 3. Função para Iniciar Partida
 function startNewGame() {
-    setupEventListeners();
+
+    // setupEventListeners();
     bot = gameMode === 'pve' ? new Bot('blue', cpuDifficulty) : null;
 
     if (gameMode === 'online') {
-        if (!onlineManager) {
-            onlineManager = new OnlineManager(board, roomManager);
-            onlineManager.start();
-        }
+        if (onlineManager) onlineManager.stop();
+        onlineManager = new OnlineManager(board, roomManager);
+        onlineManager.start();
+        listenToScore();
+        updateScoreBoardUI();
     } else {
         onlineManager = null;
     }
-
     board.reset(); // Isso vai disparar o evento 'board:reset', ativando a reconstrução e renderização da tela!
 }
 
@@ -147,6 +190,46 @@ async function getRatingToShow(ratingData) {
     return '';
 }
 
+function listenToScore() {
+    if (!roomManager || !roomManager.roomCode) return;
+
+    const scoreREf = ref(database, `rooms/${roomManager.roomCode}/score`);
+
+    onValue(scoreREf, async () => {
+        // const score = await roomManager.getRoomScore();
+        // uiManager.hostScore.textContent = score.host;
+        // uiManager.guestScore.textContent = score.guest;
+        await updateScoreBoardUI();
+    });
+}
+
+async function updateScoreBoardUI() {
+    if (!roomManager) return;
+
+    const roomData = await roomManager.getRoomData();
+    if (!roomData) return;
+
+    const host = roomData.players.host;
+    const guest = roomData.players.guest;
+    const score = roomData.score || {};
+
+    if (uiManager.hostName) uiManager.hostName.textContent = host.displayName;
+    if (uiManager.hostScore) uiManager.hostScore.textContent = score[host.uid] || 0;
+
+    if (guest) {
+        if (uiManager.guestName) uiManager.guestName.textContent = guest.displayName;
+        if (uiManager.guestScore) uiManager.guestScore.textContent = score[guest.uid] || 0;
+    }
+
+    const isHostRed = roomManager.localColor === 'red'
+        ? (roomManager.playerManager.uid === host.uid)
+        : (roomManager.playerManager.uid !== host.uid)
+
+    if (uiManager.hostCard) uiManager.hostCard.setAttribute('data-current-color', isHostRed ? 'red' : 'blue');
+    if (uiManager.guestCard) uiManager.guestCard.setAttribute('data-current-color', isHostRed ? 'blue' : 'red');
+
+}
+
 // 4. Configuração dos Eventos da Interface de Usuário (Botões)
 if (uiManager.btnConfirmName) {
     uiManager.btnConfirmName.addEventListener('click', async () => {
@@ -169,6 +252,7 @@ if (uiManager.btnPvpLocal) {
 
         setTimeout(() => {
             uiManager.hideModeModal();
+
             startNewGame();
         }, 200);
     });
@@ -195,10 +279,10 @@ if (uiManager.btnCreateRoom) {
         try {
             const code = await roomManager.createRoom();
             uiManager.setRoomCodeDisplay(code);
-            uiManager.showOnlineStep('waiting');
+            uiManager.showOnlineStep('choice');
 
             const unsubscribe = roomManager.onRoomUpdate(async (room) => {
-                if (room && room.status === 'playing' && room.players?.blue) {
+                if (room && room.status === 'playing' && room.players?.guest) {
                     gameMode = 'online';
                     uiManager.hideOnlineModal();
                     attachRematchListener()
@@ -228,7 +312,9 @@ if (uiManager.btnConfirmJoin) {
         try {
             await roomManager.joinRoom(code);
             const roomData = await roomManager.getRoomData();
-            uiManager.setReadyPlayers(roomData.players.red.displayName, roomData.players.blue.displayName);
+            if (!roomData) return;
+
+            uiManager.setReadyPlayers(roomData.players.host.displayName, roomData.players.guest.displayName);
             gameMode = 'online';
             uiManager.hideOnlineModal();
             attachRematchListener()
@@ -322,9 +408,10 @@ if (uiManager.btnPlayAgain) {
 }
 
 if (uiManager.btnExitLobby) {
-    uiManager.btnExitLobby.addEventListener('click', () => {
+    uiManager.btnExitLobby.addEventListener('click', async () => {
         uiManager.hideWinModal()
         uiManager.showModeModal()
+        await roomManager.leaveRoom()
     })
 }
 
@@ -367,6 +454,7 @@ async function initApp() {
     if (savedName) {
         await playerManager.init(savedName);
         proceedAfterIdentity();
+        setupEventListeners();
     } else {
         uiManager.showNameModal();
     }
@@ -417,8 +505,10 @@ function attachRematchListener() {
         }
 
         if (rematch.status === 'accepted') {
-            await roomManager.syncLocalColorAfterRematch();
             uiManager.hideRematchUI();
+            roomManager.switchLocalColor();
+            await roomManager.asyncCurrentMatch();
+            onlineManager.start();
             startNewGame();
             await roomManager.clearRematchRequest();
         }
